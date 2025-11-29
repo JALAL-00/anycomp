@@ -1,11 +1,12 @@
-// src/routes/auth.route.ts
+// src/routes/auth.route.ts (FULL CORRECTED CODE with asyncHandler)
 
-import { Router, Response } from 'express'; // Removed Request
+import { Router, Response } from 'express'; // Removed Request, using CustomRequest
 import { CustomRequest } from '../types/Request'; // <-- NEW IMPORT
 import { registerUser, loginUser } from '../services/auth.service';
 import { ApiError } from '../middlewares/error.middleware';
 import { validate } from 'class-validator';
 import { User } from '../models/User';
+import asyncHandler from '../middlewares/async.middleware'; // <-- NEW IMPORT
 
 const authRouter = Router();
 
@@ -14,7 +15,7 @@ const authRouter = Router();
  * @description Registers a new specialist user.
  * @access Public
  */
-authRouter.post('/register', async (req: CustomRequest, res: Response) => { // <-- Used CustomRequest
+authRouter.post('/register', asyncHandler(async (req: CustomRequest, res: Response) => { // <-- WRAPPED
   const { email, password } = req.body;
 
   // Simple input validation check
@@ -45,14 +46,14 @@ authRouter.post('/register', async (req: CustomRequest, res: Response) => { // <
       is_active: user.is_active,
     },
   });
-});
+}));
 
 /**
  * @route POST /api/auth/login
  * @description Authenticates a user and returns a JWT token.
  * @access Public
  */
-authRouter.post('/login', async (req: CustomRequest, res: Response) => { // <-- Used CustomRequest
+authRouter.post('/login', asyncHandler(async (req: CustomRequest, res: Response) => { // <-- WRAPPED
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -71,6 +72,6 @@ authRouter.post('/login', async (req: CustomRequest, res: Response) => { // <-- 
       is_active: user.is_active,
     },
   });
-});
+}));
 
 export default authRouter;

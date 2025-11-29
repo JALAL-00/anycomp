@@ -2,7 +2,11 @@
 
 import 'dotenv/config';
 import { DataSource } from 'typeorm';
-import { User } from '../models/User'; 
+import { User } from '../models/User';
+import { Specialist } from '../models/Specialist';
+import { Media } from '../models/Media';
+import { PlatformFee } from '../models/PlatformFee';
+import { ServiceOffering } from '../models/ServiceOffering';
 
 // Environment variables are loaded from .env file
 const { DB_HOST, DB_PORT, DB_USERNAME, DB_PASSWORD, DB_DATABASE, NODE_ENV } = process.env;
@@ -25,6 +29,10 @@ export const AppDataSource = new DataSource({
   entities: [
     // Entities will be added here in Module 3
     User,
+    Specialist,
+    Media,
+    PlatformFee,
+    ServiceOffering,
     `${__dirname}/../models/*.ts`, 
   ],
   migrations: [

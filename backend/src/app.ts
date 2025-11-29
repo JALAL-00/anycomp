@@ -13,6 +13,7 @@ import { errorHandler, notFoundHandler } from './middlewares/error.middleware';
 // Routes imports
 import baseRouter from './routes/index'; 
 import authRouter from './routes/auth.route'; // Import auth router
+import specialistRouter from './routes/specialist.route';
 import { createAdminIfNotExist } from './services/auth.service'; // Import Admin creator
 
 
@@ -39,6 +40,7 @@ app.use(express.json());
 
 // Base route for health check and general info
 app.use('/api/auth', authRouter);
+app.use('/api/specialists', specialistRouter);
 app.use('/api', baseRouter); 
 
 // === 3. Error Handlers ===
