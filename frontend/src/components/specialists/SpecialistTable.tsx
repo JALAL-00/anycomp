@@ -1,15 +1,17 @@
-// src/components/specialists/SpecialistTable.tsx
+// src/components/specialists/SpecialistTable.tsx (FINAL CORRECTED CODE)
 'use client';
 
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
+import { RootState, AppDispatch } from '@/store/store'; // <-- Added AppDispatch
 import { setPage, Specialist } from '@/store/specialistSlice';
 import { 
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow, 
     Paper, Checkbox, Typography, Chip, IconButton, 
     TablePagination
 } from '@mui/material';
+// FIX: Correctly imported SpecialistActions
+import SpecialistActions from './SpecialistActions'; 
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import Link from 'next/link';
 
@@ -78,10 +80,16 @@ const StatusChip: React.FC<{ status: string; type: 'approval' | 'publish' }> = (
  * Renders the main table of specialists with pagination.
  */
 const SpecialistTable: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>(); // <-- Correct dispatch typing
   const { list, total, page, limit, loading } = useSelector((state: RootState) => state.specialists);
   const [selected, setSelected] = useState<string[]>([]);
   
+  // Placeholder Delete Handler (Will be fully implemented in Module 5)
+  const handleDeleteSpecialist = (id: string) => {
+    console.log(`Deleting specialist with ID: ${id}`);
+    // NOTE: Full API call and Redux state update will go here in Module 5
+  }
+
   // Handlers for selection
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
@@ -200,10 +208,11 @@ const SpecialistTable: React.FC = () => {
                     <StatusChip status={row.is_draft ? 'Not Published' : 'Published'} type='publish' />
                   </TableCell>
                   <TableCell align="left" sx={{ padding: '12px 16px' }}>
-                    {/* Action Menu - Simplifed to a button for now */}
-                    <IconButton size='small'>
-                        <MoreVertIcon sx={{ color: 'var(--tw-colors-text-primary)' }} />
-                    </IconButton>
+                    {/* Action Menu (Final Fix) */}
+                    <SpecialistActions 
+                        specialistId={row.id} 
+                        onDelete={handleDeleteSpecialist} 
+                    />
                   </TableCell>
                 </TableRow>
               );
@@ -243,9 +252,6 @@ const SpecialistTable: React.FC = () => {
         }}
         // Placeholder for custom pagination UI to match Figma's exact look
         // We use the MUI component but severely restrict it to match the visual
-        
-        // This is a simplified/wrapped MUI pagination. For pixel-perfect match, 
-        // a custom component would replace the MUI one here. 
       />
 
     </Paper>

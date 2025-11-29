@@ -1,10 +1,13 @@
-// src/app/providers.tsx (NEW FILE)
+// src/app/providers.tsx (FULL CORRECTED CODE)
 'use client';
 
 import { Provider } from 'react-redux';
 import { store } from '../store/store';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+// FIX: Changed to NAMED IMPORT { AuthProvider }
+import { AuthProvider } from '@/context/AuthContext'; 
+
 
 // Define the custom MUI Theme (MUI uses its own system, but we align colors)
 const theme = createTheme({
@@ -37,11 +40,11 @@ interface ProvidersProps {
 export function Providers({ children }: ProvidersProps) {
   return (
     <Provider store={store}>
-      {/* MUI Provider with custom theme */}
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        {/* Auth Provider will go here later */}
-        {children}
+        <AuthProvider> {/* AuthProvider is correctly placed here */}
+          {children}
+        </AuthProvider>
       </ThemeProvider>
     </Provider>
   );
