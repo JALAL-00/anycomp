@@ -1,17 +1,19 @@
 # Anycomp - Fullstack Developer Project Assessment (ST COMP HOLDINGS SDN BHD)
 
-This is a complete, production-grade implementation of the Anycomp Specialist Registration and Management System, developed as a full-stack proficiency assessment.
+This is a complete, production-grade implementation of the **Anycomp Specialist Registration and Management System**, developed as a full-stack proficiency assessment.
 
-The project features a PostgreSQL backend managed by a robust Next.js/React frontend with JWT/RBAC for secure administrative access.
+The project features a **PostgreSQL** backend managed by a robust **Next.js/React** frontend with **JWT/RBAC** for secure administrative access.
 
 ## 🚀 Key Features Implemented
 
 *   **Full-Stack Architecture:** Next.js (Frontend) + Node.js/Express/TypeORM (Backend).
 *   **Database:** PostgreSQL with transactional migrations (`users`, `specialists`, `media`, `service_offerings`, `platform_fee`).
 *   **Admin Dashboard (Page 1):** Full List View, Filtering (All/Drafts/Published), Search, and Pagination.
-*   **Specialist Management (Pages 2 & 3):** Dedicated UI for seamless creation and editing of specialist records.
-*   **Publishing Flow (Module 5):** Functional button for publishing/unpublishing specialists (`PATCH /publish`).
-*   **Security (Bonus Requirement):** Implemented JWT Authentication and Role-Based Access Control (`AuthGuard` / `protect` middleware) to enforce Admin-Only access to the management pages.
+*   **Specialist Management (Pages 2 & 3):** Dedicated UI for seamless creation and editing of specialist records using "Smart Mode Detection".
+*   **Media Management:** Multi-slot image upload support (3 slots) mapped to specific display orders.
+*   **Dynamic Forms:** "Additional Offerings" implementation with chip-based input logic.
+*   **Publishing Flow:** Modal-confirmed publishing workflow (`PATCH /publish`).
+*   **Security (Bonus Requirement):** Implemented JWT Authentication and Role-Based Access Control (`AuthGuard`) to enforce Admin-Only access.
 
 ---
 
@@ -19,9 +21,9 @@ The project features a PostgreSQL backend managed by a robust Next.js/React fron
 
 | Component | Technology | Notes |
 | :--- | :--- | :--- |
-| **Frontend** | Next.js 14+ (App Router), TypeScript, Tailwind CSS, Material UI, Redux Toolkit | Client-side application with state management and pixel-perfect Figma adherence. |
-| **Backend** | Node.js, Express, TypeScript, TypeORM | RESTful API architecture with error handling and transaction management. |
-| **Database** | PostgreSQL | Relational database (explicitly NOT MongoDB as requested). |
+| **Frontend** | Next.js 16 (App Router), TypeScript, Tailwind CSS, Material UI, Redux Toolkit | Client-side application with state management and pixel-perfect Figma adherence. |
+| **Backend** | Node.js, Express, TypeScript, TypeORM | RESTful API architecture with error handling, strict validation, and transaction management. |
+| **Database** | PostgreSQL | Relational database (strictly NOT MongoDB). |
 | **Auth** | JWT, BCrypt, RBAC | Admin-only access enforcement on critical endpoints. |
 
 ---
@@ -30,66 +32,88 @@ The project features a PostgreSQL backend managed by a robust Next.js/React fron
 
 ### A. Prerequisites
 
-1.  **Node.js:** v18+
-2.  **PostgreSQL:** Instance running locally (Default port 5432).
-3.  **Database Creation:** You must create an empty database named `anycomp_db` (or whatever you set in your `.env`).
+1.  **Node.js:** v18 or higher.
+2.  **PostgreSQL:** Instance running locally on default port `5432`.
+3.  **Database:** You **must** create a database named `anycomp_db` before running the backend.
 
 ### B. Backend Setup (Port 5002)
 
-1.  Navigate to the `backend` directory.
+1.  Navigate to the `backend` directory:
     ```bash
     cd backend
     ```
-2.  Create the environment file and set up credentials (Port **5002** is used).
-    ```bash
-    cp .env.example .env
-    # NOTE: Fill in your PostgreSQL credentials and a JWT_SECRET
-    ```
-3.  Install dependencies.
+
+2.  Install dependencies:
     ```bash
     npm install
     ```
-4.  Run Database Migrations and initial Admin Seeding.
+
+3.  Create a `.env` file in the `backend` folder with the following content:
+    ```env
+    PORT=5002
+    NODE_ENV=development
+
+    # Database Configuration (Update password if needed)
+    DB_HOST=localhost
+    DB_PORT=5432
+    DB_USERNAME=postgres
+    DB_PASSWORD=your_password_here
+    DB_DATABASE=anycomp_db
+
+    # Security
+    JWT_SECRET=super_secure_assessment_key_2024
+    ```
+
+4.  Run Migrations (Create Tables) and Seed Admin:
     ```bash
     npm run migration:run
     ```
-5.  Start the backend server.
+
+5.  Start the backend server:
     ```bash
     npm run dev
-    # API is available at: http://localhost:5002/api
     ```
-    **Default Admin Account:** `admin@stcomp.com` / `AdminPassword123` (Set by auth.service.ts)
+    *(Console should show: "Server running on port 5002")*
 
 ### C. Frontend Setup (Port 3000)
 
-1.  Navigate to the `frontend` directory.
+1.  Open a new terminal and navigate to the `frontend` directory:
     ```bash
-    cd ../frontend
+    cd frontend
     ```
-2.  Create environment file (already set to port 5002 in `.env.local.example`).
-    ```bash
-    cp .env.local.example .env.local
-    ```
-3.  Install dependencies.
+
+2.  Install dependencies:
     ```bash
     npm install
     ```
-4.  Start the frontend application.
-    ```bash
-    npm run dev
-    # Application is available at: http://localhost:3000/
+
+3.  Create a `.env.local` file in the `frontend` folder:
+    ```env
+    NEXT_PUBLIC_API_URL=http://localhost:5002/api
     ```
 
-## 🔐 Final Verification Flow
-
-1.  **Access:** Navigate to `http://localhost:3000/login`.
-2.  **Admin Login:** Sign in with: `admin@stcomp.com` / `AdminPassword123`.
-3.  **Redirect Check:** You are automatically redirected to the **All Specialists Page (Page 1)**: `/admin/specialists`.
-4.  **Creation Check (Page 2):** Click **CREATE** on Page 1. Fill out the **Title, Description, and Price** fields (required fields).
-5.  **Submission Check (Page 3):** Click **Create Specialist** $\rightarrow$ You are redirected to the **Edit Page** with a new URL (`/edit/:id`).
-6.  **Publishing Check:** Click the **Publish** button $\rightarrow$ Alert "Specialist published successfully!".
-7.  **Final Flow Check:** Navigate back to `/admin/specialists` (Page 1). The newly created specialist should be visible in the list.
+4.  Start the frontend application:
+    ```bash
+    npm run dev
+    ```
 
 ---
 
-***Good luck with the review, a glorious future awaits you.***
+## 🔐 Final Verification Flow
+
+To verify the assessment requirements:
+
+1.  **Login:** Open `http://localhost:3000/login`
+    *   **Email:** `admin@stcomp.com`
+    *   **Password:** `AdminPassword123`
+2.  **Dashboard (Page 1):** You will be redirected to the Specialists list.
+3.  **Create (Page 2):** Click **CREATE**. Fill in *Title, Description, Price*, and upload mock images.
+4.  **Edit & Publish (Page 3):** Click **Create**. The page will reload in "Edit Mode". Click **Publish**, confirm the Modal, and verify the status change.
+5.  **List Check:** Go back to the Dashboard. Use the **Published** filter tab to find your new record.
+
+---
+
+### 👨‍💻 Author
+
+**Role:** Full-Stack Developer Assessment
+**For:** ST COMP HOLDINGS SDN BHD
