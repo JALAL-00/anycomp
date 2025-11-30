@@ -9,22 +9,16 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Required Font Color from PDF
         'text-primary': '#222222', 
-        // Derived from Figma Sidebar/Accent
-        'primary-dark': '#00244F', // Dark Navy for Sidebar
-        'primary-blue': '#0A66C2', // Main Accent/Button Blue
-        'accent-green': '#4CAF50', // Approved Status
-        'accent-red': '#E53935',   // Rejected Status
-        'accent-cyan': '#00BCD4',  // Under Review Status
-        'sidebar-active': '#0D47A1', // A slightly different blue for active sidebar link
-        'bg-light': '#FAFBFC',      // Very light background for content area
+        'primary-dark': '#00244F', 
+        'primary-blue': '#0A66C2', 
+        'accent-green': '#4CAF50', 
+        'accent-red': '#E53935',   
+        'accent-cyan': '#00BCD4',  
+        'sidebar-active': '#0D47A1', 
+        'bg-light': '#FAFBFC',      
       },
       fontFamily: {
-        // Fallbacks for Proxima Nova and Red Hat Display (Required by PDF)
-        // NOTE: For the final, perfect design, Proxima Nova and Red Hat Display 
-        // must be loaded locally as they are not Google Fonts. 
-        // We will use a functional font stack here.
         sans: ['"Red Hat Display"', 'ui-sans-serif', 'system-ui'],
         body: ['"Proxima Nova"', 'ui-sans-serif', 'system-ui'],
       },

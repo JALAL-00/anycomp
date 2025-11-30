@@ -1,25 +1,44 @@
-// frontend/src/components/specialists/SpecialistForm.tsx (FINAL CLEAN-UP CODE)
+// frontend/src/components/specialists/SpecialistForm.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { TextField, Typography, Button, CircularProgress } from '@mui/material';
+import { 
+    TextField, Typography, Button, CircularProgress, Select, 
+    MenuItem, FormControl, InputLabel, IconButton // Added missing import
+} from '@mui/material';
 import { useRouter } from 'next/navigation';
+import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+
 import ProfessionalFeeCard from './ProfessionalFeeCard';
 import AdditionalOfferingsSection from './AdditionalOfferingsSection';
 import ProfileCardSection from './ProfileCardSection';
+import ConfirmationModal from '../ui/ConfirmationModal'; 
 import api from '@/lib/api';
 
-// Interface for Media payload (For API submission)
 interface MediaPayload { file_name: string; mime_type: string; file_size: number; display_order: number; }
 interface FormState {
     title: string; description: string; base_price: number; duration_days: number;
-    is_draft?: boolean; mediaFile: File | null; mediaPreviewUrl: string | null;
+    is_draft?: boolean;
+    category: string; 
+    completion_time_label: string;
 }
-const initialFormState: FormState = { title: '', description: '', base_price: 1800, duration_days: 7, is_draft: true, mediaFile: null, mediaPreviewUrl: null, };
+
+const initialFormState: FormState = { 
+    title: '', description: '', base_price: 1800, duration_days: 7, is_draft: true,
+    category: 'Incorporation', completion_time_label: '7 Days'
+};
 
 interface SpecialistFormProps {
     mode: 'create' | 'edit';
     specialistId?: string; 
+}
+
+// Media Slot Interface
+interface MediaSlot {
+    file: File | null;
+    preview: string | null;
+    id: number; // 1, 2, 3
 }
 
 const SpecialistForm: React.FC<SpecialistFormProps> = ({ mode, specialistId }) => {
@@ -27,34 +46,52 @@ const SpecialistForm: React.FC<SpecialistFormProps> = ({ mode, specialistId }) =
     const [formData, setFormData] = useState<FormState>(initialFormState);
     const [loading, setLoading] = useState(false);
     const [submissionError, setSubmissionError] = useState<string | null>(null);
+    const [showPublishModal, setShowPublishModal] = useState(false);
 
-    // Calculated field logic (Remains the same)
+    // Three Media Slots Logic
+    const [mediaSlots, setMediaSlots] = useState<MediaSlot[]>([
+        { id: 1, file: null, preview: null },
+        { id: 2, file: null, preview: null },
+        { id: 3, file: null, preview: null },
+    ]);
+
     const SERVICE_FEE_RATE = 0.3; 
     const serviceFee = formData.base_price * SERVICE_FEE_RATE;
     const totalFee = formData.base_price + serviceFee;
     const yourReturns = totalFee * (1 - SERVICE_FEE_RATE);
 
-    // --- EFFECT: FETCH DATA FOR EDIT MODE (Final Fix - Use a simple check) ---
+    // --- FETCH DATA FOR EDIT MODE ---
     useEffect(() => {
-        if (mode === 'edit' && specialistId && formData.title === '') { // Only fetch if form is blank
+        if (mode === 'edit' && specialistId && formData.title === '') { 
             setLoading(true);
             const fetchData = async () => {
                 try {
                     const response = await api.get(`/specialists/${specialistId}`);
-                    const specialistData = response.data.data;
+                    const data = response.data.data;
 
                     setFormData({
-                        title: specialistData.title,
-                        description: specialistData.description,
-                        base_price: specialistData.base_price ? parseFloat(specialistData.base_price) : 0,
-                        duration_days: specialistData.duration_days,
-                        is_draft: specialistData.is_draft,
-                        mediaFile: null,
-                        mediaPreviewUrl: specialistData.media?.[0]?.file_name ? `https://via.placeholder.com/320x320/FF6347/FFFFFF?text=Saved+Image` : null, // MOCK saved image
+                        title: data.title,
+                        description: data.description,
+                        base_price: data.base_price ? parseFloat(data.base_price) : 0,
+                        duration_days: data.duration_days,
+                        is_draft: data.is_draft,
+                        category: 'Incorporation', 
+                        completion_time_label: `${data.duration_days} Days`
                     });
+
+                    // Load MOCK images into slots based on existence of backend data
+                    if (data.media && data.media.length > 0) {
+                        const newSlots = [...mediaSlots];
+                        // If data exists, mock populating slots with dummy images since real file storage isn't implemented
+                        newSlots[0].preview = "https://via.placeholder.com/400x300/E0E0E0/222222?text=Image+1";
+                        if(data.media.length > 1) newSlots[1].preview = "https://via.placeholder.com/400x300/E0E0E0/222222?text=Image+2";
+                        if(data.media.length > 2) newSlots[2].preview = "https://via.placeholder.com/400x300/E0E0E0/222222?text=Image+3";
+                        setMediaSlots(newSlots);
+                    }
+
                 } catch (error) {
                     console.error('Fetch Error:', error);
-                    setSubmissionError('Failed to load specialist data for editing.');
+                    setSubmissionError('Failed to load specialist data.');
                     router.push('/admin/specialists');
                 } finally {
                     setLoading(false);
@@ -62,67 +99,63 @@ const SpecialistForm: React.FC<SpecialistFormProps> = ({ mode, specialistId }) =
             };
             fetchData();
         }
-    }, [mode, specialistId, router]);
+    }, [mode, specialistId, router]); // Dependency array
 
-
-    // HANDLERS (Simplified) ...
-
+    // HANDLERS
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: name === 'base_price' || name === 'duration_days' ? parseFloat(value) : value,
-        }));
+        setFormData(prev => ({ ...prev, [name]: name === 'base_price' ? parseFloat(value) : value }));
     };
-    
-    // Handler for actual file upload input (Logic remains the same)
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+
+    const handleSelectChange = (e: any) => { // SelectChangeEvent generic handling
+         const { name, value } = e.target;
+         setFormData(prev => ({ ...prev, [name]: value }));
+    }
+
+    // Single File Handler per Slot
+    const handleFileChange = (slotId: number, e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file && file.size <= 4 * 1024 * 1024) {
-            const previewUrl = URL.createObjectURL(file);
-            setFormData(prev => ({ 
-                ...prev, 
-                mediaFile: file,
-                mediaPreviewUrl: previewUrl,
-            }));
-        } else {
-             if (file) alert('File must be an image and under 4MB.');
-             e.target.value = '';
+        if (file) {
+            if (file.size > 4 * 1024 * 1024) {
+                 alert('File max 4MB'); return;
+            }
+            const preview = URL.createObjectURL(file);
+            setMediaSlots(prev => prev.map(slot => slot.id === slotId ? { ...slot, file, preview } : slot));
         }
     };
 
+    const removeFile = (slotId: number) => {
+        setMediaSlots(prev => prev.map(slot => slot.id === slotId ? { ...slot, file: null, preview: null } : slot));
+    };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleFormSubmit = async (e?: React.FormEvent, publishAction: boolean = false) => {
+        if (e) e.preventDefault();
         setLoading(true);
         setSubmissionError(null);
 
         try {
-            // ... (Basic Frontend Validation remains the same) ...
-            if (!formData.title || !formData.description || !formData.base_price) {
-                 setSubmissionError('Title, description, and base price are required to create a specialist.');
-                 setLoading(false);
-                 return;
+            // Validation
+            if (!formData.title || !formData.description) {
+                 throw new Error('Title and description are required.');
             }
 
-            // 1. Construct Media Payload (Logic remains the same)
-            let mediaPayload: MediaPayload[] = [];
-            // ... (media payload construction remains the same) ...
-            if (formData.mediaFile) {
-                mediaPayload = [{ file_name: formData.mediaFile.name, mime_type: formData.mediaFile.type, file_size: formData.mediaFile.size, display_order: 1 }];
-            } else if (formData.mediaPreviewUrl && mode === 'edit') {
-                 // Send existing metadata if the form is in edit mode and a preview exists
-                 mediaPayload = [{ file_name: 'existing_image.png', mime_type: 'image/png', file_size: 100000, display_order: 1, }];
-            }
+            // Construct Media Payload
+            const mediaPayload: MediaPayload[] = mediaSlots
+                .filter(s => s.file || s.preview) // Has file or existing preview
+                .map((s, i) => ({
+                    file_name: s.file ? s.file.name : `existing_img_${i}.png`, 
+                    mime_type: s.file ? s.file.type : 'image/png', 
+                    file_size: s.file ? s.file.size : 1024, 
+                    display_order: i + 1 
+                }));
 
-            // 2. Construct Final Submission Body (Logic remains the same)
             const submissionData = {
-                title: formData.title, description: formData.description, base_price: formData.base_price, duration_days: formData.duration_days, is_draft: formData.is_draft, media: mediaPayload
+                ...formData,
+                media: mediaPayload
             };
 
-            // 3. API Call
-            let response;
             const url = mode === 'edit' ? `/specialists/${specialistId}` : '/specialists';
+            let response; 
             
             if (mode === 'create') {
                 response = await api.post(url, submissionData);
@@ -130,82 +163,70 @@ const SpecialistForm: React.FC<SpecialistFormProps> = ({ mode, specialistId }) =
                 response = await api.put(url, submissionData);
             }
             
-            // 4. Success and Redirect 
-            const newId = response.data.data.id;
+            const savedId = response.data.data.id;
+
+            if (publishAction) {
+                await api.patch(`/specialists/${savedId}/publish`);
+                setFormData(prev => ({ ...prev, is_draft: false }));
+            }
             
             if (mode === 'create') {
-                router.push(`/admin/specialists/edit/${newId}`); // Redirect to EDIT mode for seamless flow
-            } else {
-                 setFormData(prev => ({ ...prev, is_draft: response.data.data.is_draft })); 
-                 // Success alert
+                router.push(`/admin/specialists/edit/${savedId}`);
             }
+
         } catch (error: any) {
-            console.error('Submission Error:', error);
-            setSubmissionError(error || 'An unexpected error occurred during submission.');
+            setSubmissionError(typeof error === 'string' ? error : error?.message || 'Error occurred');
         } finally {
             setLoading(false);
+            setShowPublishModal(false);
         }
     };
 
-    // PUBLISH Logic (Remains the same) ...
-
-    const handlePublish = async () => {
-        if (!specialistId) return;
-        
-        if (!formData.title || !formData.description || !formData.base_price) {
-             alert('Please fill in required fields before publishing.');
+    const triggerPublishFlow = () => {
+        if(mode === 'create' || !specialistId) {
+             alert('Please save the specialist before publishing.');
              return;
         }
-
-        setLoading(true);
-        try {
-            await api.patch(`/specialists/${specialistId}/publish`);
-            setFormData(prev => ({ ...prev, is_draft: false })); 
-            alert('Specialist published successfully!');
-        } catch (error) {
-            setSubmissionError('Failed to publish specialist.');
-        } finally {
-            setLoading(false);
-        }
+        setShowPublishModal(true);
     };
-    
-    // Handle loading states
-    if (loading && mode === 'edit' && formData.title === '') {
-        return <CircularProgress />; 
-    }
-    
-    const mainUploadedImage = formData.mediaPreviewUrl; // The currently uploaded URL or saved URL
 
+    if (loading && mode === 'edit' && formData.title === '') return <CircularProgress className="m-10"/>; 
+    
     return (
-        <div className="min-h-full">
-            
-            {/* Header (Top of form - Page Title & Buttons) */}
-            <div className="flex items-center justify-between sticky top-0 bg-white pt-2 pb-6 z-10">
+        <div className="min-h-full pb-20">
+            {/* Modal */}
+            <ConfirmationModal 
+                open={showPublishModal}
+                title="Publish changes"
+                message="Do you want to publish these changes? It will appear in the marketplace listing"
+                onCancel={() => setShowPublishModal(false)}
+                onConfirm={() => handleFormSubmit(undefined, true)}
+                confirmText="Save changes"
+            />
+
+            {/* Header */}
+            <div className="flex items-center justify-between sticky top-0 bg-white pt-2 pb-6 z-10 border-b border-dashed border-zinc-200 mb-6">
                 <Typography variant="h5" className="text-3xl font-semibold text-text-primary font-sans">
-                    Register a new company | Private Limited - Sdn Bhd
+                   {formData.title || 'New Service Listing'}
                 </Typography>
                 
-                {/* Edit/Publish Buttons (Figma Look) */}
                 <div className="flex space-x-2">
-                    {/* The EDIT button now triggers the form's SAVE action for Page 3 visualization */}
                     <Button 
                         variant="outlined" 
-                        onClick={handleSubmit} // Triggers SAVE/PUT request
+                        onClick={() => handleFormSubmit()} 
                         disabled={loading}
-                        sx={{ borderRadius: '6px', height: '40px', borderColor: '#D1D5DB' }}
+                        sx={{ borderRadius: '6px', borderColor: '#D1D5DB' }}
                     >
-                        Edit
+                        Save
                     </Button>
-                    {/* PUBLISH Button */}
                     <Button 
                         variant="contained" 
-                        onClick={handlePublish} // Triggers PUBLISH
-                        disabled={loading || mode === 'create'} // Disable if ID doesn't exist
+                        onClick={triggerPublishFlow}
+                        disabled={loading || mode === 'create' || !formData.is_draft} 
                         sx={{ 
                             borderRadius: '6px', 
-                            height: '40px', 
-                            bgcolor: formData.is_draft ? '#00244F' : '#607D8B', // Grey/Blue visual distinction
-                            '&:hover': { bgcolor: '#0D47A1' } 
+                            bgcolor: formData.is_draft ? '#00244F' : '#4CAF50', 
+                            '&:hover': { bgcolor: formData.is_draft ? '#0D47A1' : '#388E3C' }
                         }}
                     >
                         {formData.is_draft ? 'Publish' : 'Published'}
@@ -213,73 +234,95 @@ const SpecialistForm: React.FC<SpecialistFormProps> = ({ mode, specialistId }) =
                 </div>
             </div>
             
-            <form onSubmit={handleSubmit} className="flex space-x-6">
-                
-                {/* LEFT COLUMN: Main Form Content */}
+            <form className="flex space-x-8">
+                {/* LEFT: Inputs */}
                 <div className="flex-1 space-y-10 max-w-4xl">
                     
-                    {/* Error Display (FIXED STYLING) */}
-                    {submissionError && (
-                        <div className='py-3 px-4 border border-accent-red bg-accent-red/10 rounded-lg'>
-                           <Typography color="error" className='font-medium text-sm text-accent-red'>
-                              {submissionError}
-                           </Typography>
-                        </div>
-                    )}
+                    {submissionError && <Typography color="error" className='p-3 border border-red-200 bg-red-50 rounded'>{submissionError}</Typography>}
 
-                    {/* 1. Image Upload & Image Grid (FINAL CORRECTED MATCH - 1:2 Vertical/Vertical Ratio) */}
-                    <div className="flex space-x-4">
-                        {/* W-1/3: Image Upload Area (Actual File Input) */}
-                        <label className="w-1/3 border border-zinc-200 h-80 rounded-lg flex items-center justify-center bg-zinc-50 hover:bg-zinc-100 cursor-pointer relative overflow-hidden">
-                             <input type="file" name="media" accept="image/png, image/jpeg" className="hidden" onChange={handleFileChange} />
-                             {mainUploadedImage ? (
-                                <img src={mainUploadedImage} alt="Service Preview" className="absolute w-full h-full object-cover" />
-                             ) : (
-                                <div className="text-center text-zinc-500 p-4">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mx-auto mb-2 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L20 20M5 13l4-4M15 8h.01M21 16l-3-3" />
-                                    </svg>
-                                    <Typography className="text-xs max-w-[200px] mx-auto">Upload an image for your service listing in PNG, JPG or JPEG up to 4MB</Typography>
-                                </div>
-                             )}
-                        </label>
-                        
-                        {/* W-2/3: The Image Grid (MOCKUP TOP/BOTTOM SLOTS) */}
-                        <div className='w-2/3 flex flex-col justify-between space-y-4 h-80'> 
-                            {/* Figma Mockup Top Slot (Always Mock) */}
-                            <img src='https://via.placeholder.com/400x150/000000/FFFFFF?text=Mockup+Top' alt="Mockup Top" className="h-1/2 w-full object-cover rounded-lg shadow-md" style={{ maxHeight: 'calc(50% - 8px)' }} />
-                            {/* Figma Mockup Bottom Slot (Always Mock) */}
-                            <img src='https://via.placeholder.com/400x150/B71C1C/FFFFFF?text=Mockup+Bottom' alt="Mockup Bottom" className="h-1/2 w-full object-cover rounded-lg shadow-md" style={{ maxHeight: 'calc(50% - 8px)' }} />
-                        </div>
+                    <div className='space-y-4'>
+                        <Typography className='uppercase text-xs font-bold text-zinc-400 tracking-wide'>Service Details</Typography>
+                        <TextField fullWidth label="Service Title" name="title" value={formData.title} onChange={handleInputChange} sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px' } }} />
+                    
+                        <TextField fullWidth multiline rows={4} label="Description" name="description" value={formData.description} onChange={handleInputChange} sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}/>
+                        <div className="text-right text-xs text-zinc-400">(500 words)</div>
                     </div>
                     
-                    {/* 2. Description Section (Title/Description) */}
-                    <div className='space-y-4'>
-                        <TextField fullWidth label="Service Title" name="title" value={formData.title} onChange={handleInputChange} placeholder="Enter the title for your service" variant="outlined" sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px' } }} required />
-                        
-                        <Typography variant="h6" className='font-semibold text-text-primary'>Description</Typography>
-                        <Typography variant="body2" className='text-zinc-500'>Describe your service here</Typography>
-                        <TextField fullWidth multiline rows={4} name="description" value={formData.description} onChange={handleInputChange} placeholder="Detailed service description..." variant="outlined" sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}/>
+                    {/* Time & Category Row */}
+                    <div className='flex space-x-4'>
+                         <FormControl fullWidth>
+                            <InputLabel>Estimated Completion Time</InputLabel>
+                            <Select 
+                                value={formData.completion_time_label} 
+                                label="Estimated Completion Time"
+                                name="completion_time_label"
+                                onChange={handleSelectChange}
+                                sx={{ borderRadius: '8px' }}
+                            >
+                                <MenuItem value="1 Day">1 Day</MenuItem>
+                                <MenuItem value="3 Days">3 Days</MenuItem>
+                                <MenuItem value="7 Days">7 Days</MenuItem>
+                                <MenuItem value="14 Days">14 Days</MenuItem>
+                            </Select>
+                         </FormControl>
+                         <FormControl fullWidth>
+                            <InputLabel>Supported Company Types</InputLabel>
+                             <Select 
+                                value={formData.category} 
+                                label="Supported Company Types"
+                                name="category"
+                                onChange={handleSelectChange}
+                                sx={{ borderRadius: '8px' }}
+                            >
+                                <MenuItem value="Incorporation">Private Limited - Sdn. Bhd</MenuItem>
+                                <MenuItem value="LLP">Limited Liability Partnership</MenuItem>
+                                <MenuItem value="Enterprise">Sole Proprietor</MenuItem>
+                            </Select>
+                         </FormControl>
                     </div>
 
-                    {/* 3. Additional Offerings */}
-                    <div className='space-y-4'>
-                        <Typography variant="h6" className='font-semibold text-text-primary'>Additional Offerings</Typography>
-                        <Typography variant="body2" className='text-zinc-500 mb-2'>Enhance your service by adding additional offerings.</Typography>
+                    {/* Image Upload Grid - Module 3 Style (3 Boxes) */}
+                    <div className="space-y-2">
+                         <Typography className='font-semibold'>Service Images</Typography>
+                         <div className="flex space-x-4">
+                            {mediaSlots.map((slot, index) => (
+                                <div key={slot.id} className="flex-1">
+                                    <div className="border border-dashed border-zinc-300 rounded-lg h-40 bg-zinc-50 relative flex flex-col items-center justify-center hover:bg-zinc-100 transition-colors overflow-hidden group">
+                                        <input type="file" accept="image/*" onChange={(e) => handleFileChange(slot.id, e)} className="absolute w-full h-full opacity-0 cursor-pointer z-10" />
+                                        
+                                        {slot.preview ? (
+                                            <>
+                                                <img src={slot.preview} alt={`Slot ${slot.id}`} className="w-full h-full object-cover" />
+                                                <IconButton 
+                                                    size="small"
+                                                    onClick={(e: React.MouseEvent) => { e.stopPropagation(); removeFile(slot.id); }}
+                                                    className="absolute top-1 right-1 bg-white shadow-sm z-20 opacity-0 group-hover:opacity-100"
+                                                >
+                                                    <DeleteOutlineIcon fontSize='small' color="error" />
+                                                </IconButton>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <CloudUploadOutlinedIcon className="text-primary-blue mb-2" fontSize='medium' />
+                                                <Typography className="text-xs text-zinc-500 text-center font-medium">Service Image ({index + 1})</Typography>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                         </div>
+                    </div>
+
+                    <div className='pt-4'>
+                        <Typography className='font-semibold mb-4'>Additional Offerings</Typography>
                         <AdditionalOfferingsSection />
                     </div>
 
-                    {/* 4. Company Secretary (Profile Section) */}
                     <ProfileCardSection />
-
-                    <Button type="submit" variant="contained" disabled={loading} sx={{ mt: 6, height: '48px', bgcolor: '#00244F', '&:hover': { bgcolor: '#0D47A1' }, borderRadius: '6px' }}>
-                        {loading ? <CircularProgress size={24} color='inherit' /> : (mode === 'create' ? 'Create Specialist' : 'Save Changes')}
-                    </Button>
                 </div>
 
-                
-                {/* RIGHT COLUMN: Fixed Price Panel (Matching Figma Look) */}
-                <div className="w-[300px] flex-shrink-0">
+                {/* RIGHT: Price Panel */}
+                <div className="w-[320px] flex-shrink-0">
                     <ProfessionalFeeCard 
                         basePrice={formData.base_price}
                         serviceFee={serviceFee}

@@ -1,26 +1,19 @@
 /* frontend/src/styles/globals.css (WORKAROUND - Using raw hex codes) */
 
-/* 1. FONT IMPORTS MUST COME FIRST */
 @import url('https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
-
-/* 2. TAILWIND DIRECTIVES */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-
-/* 3. CUSTOM STYLES */
 @layer base {
   body {
-    /* Use raw hex codes to bypass the theme() function error */
     color: #222222; 
     font-family: 'Proxima Nova', ui-sans-serif, system-ui;
     background-color: #FAFBFC;
   }
 
-  /* Set Red Hat Display for headings/accents */
   h1,
   h2,
   h3,

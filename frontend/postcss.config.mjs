@@ -3,7 +3,6 @@
 /** @type {import('postcss').Config} */
 const config = {
   plugins: {
-    // Ensure these plugins are correctly referenced
     tailwindcss: {},
     autoprefixer: {},
   },
