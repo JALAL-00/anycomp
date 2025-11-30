@@ -1,16 +1,13 @@
-// src/models/ServiceOffering.ts
-
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, BaseEntity, Index } from 'typeorm';
 import { Specialist } from './Specialist';
 
 @Entity('service_offerings')
-@Index(['specialist_id', 'title'], { unique: true }) // Index for specialist + title uniqueness
+@Index(['specialist_id', 'title'], { unique: true })
 export class ServiceOffering extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  // Foreign Key to specialists table
-  @Column({ type: 'uuid' }) // Explicit column for the FK
+  @Column({ type: 'uuid' })
   specialist_id!: string;
 
   @ManyToOne(() => Specialist, specialist => specialist.service_offerings, { onDelete: 'CASCADE' })
@@ -24,9 +21,8 @@ export class ServiceOffering extends BaseEntity {
   description!: string | null;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
-  price!: number; // Price for this specific offering
+  price!: number;
 
-  // Timestamps
   @CreateDateColumn({ type: 'timestamp with time zone' })
   created_at!: Date;
 

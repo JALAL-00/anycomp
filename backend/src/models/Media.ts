@@ -1,5 +1,3 @@
-// src/models/Media.ts (FINAL CORRECTED VERSION for Module 3)
-
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, DeleteDateColumn, ManyToOne, BaseEntity, Index, JoinColumn } from 'typeorm';
 import { Specialist } from './Specialist';
 
@@ -16,27 +14,25 @@ export enum MediaType {
 }
 
 @Entity('media')
-@Index(['specialist_id', 'file_name'], { unique: true }) // Added compound index for uniqueness check
+@Index(['specialist_id', 'file_name'], { unique: true })
 export class Media extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
-  
-  // Foreign Key to specialists table
-  @Column({ type: 'uuid' }) // Explicit column for the FK
-  specialist_id!: string; 
+
+  @Column({ type: 'uuid' })
+  specialist_id!: string;
 
   @ManyToOne(() => Specialist, specialist => specialist.media, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'specialist_id' }) // Join the column specialist_id with the specialist entity
-  specialist!: Specialist; 
+  @JoinColumn({ name: 'specialist_id' })
+  specialist!: Specialist;
 
-  // File Metadata
   @Column()
   file_name!: string;
 
-  @Column({ type: 'int', nullable: true }) // <-- FIXED: Added type: 'int'
-  file_size!: number | null; // Stored in bytes
+  @Column({ type: 'int', nullable: true })
+  file_size!: number | null;
 
-  @Column({ type: 'int', nullable: true }) // <-- FIXED: Added type: 'int'
+  @Column({ type: 'int', nullable: true })
   display_order!: number | null;
 
   @Column({ type: 'enum', enum: MimeType, nullable: true })
@@ -44,8 +40,7 @@ export class Media extends BaseEntity {
 
   @Column({ type: 'enum', enum: MediaType, nullable: true })
   media_type!: MediaType | null;
-  
-  // Timestamps
+
   @CreateDateColumn({ type: 'timestamp with time zone', name: 'uploaded_at' })
   uploaded_at!: Date;
 

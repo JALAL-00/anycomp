@@ -2,7 +2,6 @@
 import { MigrationInterface, QueryRunner, Table } from "typeorm";
 
 export class CreateUserTable1708892288123 implements MigrationInterface {
-
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.createTable(new Table({
             name: "users",
@@ -11,40 +10,40 @@ export class CreateUserTable1708892288123 implements MigrationInterface {
                     name: "id",
                     type: "uuid",
                     isPrimary: true,
-                    default: "gen_random_uuid()" // Use PostgreSQL function to generate UUID
+                    default: "gen_random_uuid()"
                 },
                 {
                     name: "email",
                     type: "varchar",
                     isUnique: true,
-                    isNullable: false,
+                    isNullable: false
                 },
                 {
                     name: "password",
                     type: "varchar",
-                    isNullable: false,
+                    isNullable: false
                 },
                 {
                     name: "role",
                     type: "enum",
                     enum: ['admin', 'specialist'],
-                    default: "'specialist'",
+                    default: "'specialist'"
                 },
                 {
                     name: "is_active",
                     type: "boolean",
-                    default: true,
+                    default: true
                 },
                 {
                     name: "created_at",
                     type: "timestamp with time zone",
-                    default: "now()",
+                    default: "now()"
                 },
                 {
                     name: "updated_at",
                     type: "timestamp with time zone",
-                    default: "now()",
-                },
+                    default: "now()"
+                }
             ]
         }), true);
     }

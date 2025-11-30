@@ -106,15 +106,6 @@ export default function LoginPage() {
             {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign In'} {/* <-- CORRECT BUTTON TEXT */}
           </Button>
         </form>
-        
-        <Typography variant="body2" align="center" sx={{ mt: 3, color: 'text-text-primary' }}>
-            New User? {' '}
-            <Link href="/register" passHref>
-                <MUILink component="span" sx={{ cursor: 'pointer', color: '#0A66C2' }}>
-                    Register here.
-                </MUILink>
-            </Link>
-        </Typography>
       </Paper>
     </div>
   );

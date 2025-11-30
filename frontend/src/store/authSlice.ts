@@ -1,9 +1,7 @@
-// src/store/authSlice.ts
-
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-// Matches the backend UserRole enum
-export type UserRole = 'admin' | 'specialist'; 
+// Matches the backend UserRole enum (Admin ONLY)
+export type UserRole = 'admin'; 
 
 interface AuthState {
     token: string | null;
@@ -43,7 +41,7 @@ const authSlice = createSlice({
             state.loading = false;
             state.error = null;
             // Store token in storage for persistence and API header use
-            localStorage.setItem('admin_token', action.payload.token); 
+            localStorage.setItem('admin_token', action.payload.token || ''); 
         },
         logout(state) {
             state.token = null;

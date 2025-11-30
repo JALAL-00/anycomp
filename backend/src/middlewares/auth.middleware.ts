@@ -1,13 +1,10 @@
-// src/middlewares/auth.middleware.ts
-
-import { Response, NextFunction, Router } from 'express'; // Removed Request
-import { CustomRequest } from '../types/Request'; // <-- NEW IMPORT
+import { Response, NextFunction, Router } from 'express';
+import { CustomRequest } from '../types/Request';
 import * as jwt from 'jsonwebtoken';
 import { ApiError } from './error.middleware';
 import { JWT_SECRET } from '../config/constants';
-import { UserRole } from '../models/User'; // Keep UserRole for type
+import { UserRole } from '../models/User';
 
-// Define the structure of the JWT payload
 interface TokenPayload {
   id: string;
   role: UserRole;
@@ -15,13 +12,9 @@ interface TokenPayload {
   exp: number;
 }
 
-/**
- * Middleware to check for a valid JWT and attach user info to the request (req.user).
- */
-export const protect = (req: CustomRequest, res: Response, next: NextFunction) => { // <-- Used CustomRequest
+export const protect = (req: CustomRequest, res: Response, next: NextFunction) => {
   let token: string | undefined;
 
-  // 1. Check for token in 'Authorization: Bearer <token>' header
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     token = req.headers.authorization.split(' ')[1];
   }
@@ -31,13 +24,11 @@ export const protect = (req: CustomRequest, res: Response, next: NextFunction) =
   }
 
   try {
-    // 2. Verify the token
     const decoded = jwt.verify(token, JWT_SECRET) as TokenPayload;
 
-    // 3. Attach user info to the request object
     req.user = {
       id: decoded.id,
-      role: decoded.role,
+      role: decoded.role
     };
     
     next();
@@ -47,19 +38,12 @@ export const protect = (req: CustomRequest, res: Response, next: NextFunction) =
   }
 };
 
-/**
- * Middleware to check if the authenticated user has one of the required roles (RBAC).
- * Example usage: authorize(UserRole.ADMIN, UserRole.SPECIALIST)
- */
 export const authorize = (...roles: UserRole[]) => {
-  return (req: CustomRequest, res: Response, next: NextFunction) => { // <-- Used CustomRequest
-    // Check if the protect middleware ran successfully
+  return (req: CustomRequest, res: Response, next: NextFunction) => {
     if (!req.user) {
-        // This is a server configuration error, user should have been attached by 'protect'
-        return next(new ApiError(500, 'Authorization failed: User not attached to request.'));
+      return next(new ApiError(500, 'Authorization failed: User not attached to request.'));
     }
     
-    // Check if the user's role is included in the allowed roles list
     if (!roles.includes(req.user.role)) {
       return next(new ApiError(403, `Forbidden: User role '${req.user.role}' is not allowed to access this resource.`));
     }
@@ -68,18 +52,16 @@ export const authorize = (...roles: UserRole[]) => {
   };
 };
 
-// Example Protected Route to test the middlewares
 export const protectedRoute = Router();
 protectedRoute.get(
-    '/admin-test', 
-    protect, 
-    authorize(UserRole.ADMIN),
-    (req: CustomRequest, res: Response) => { // <-- Used CustomRequest
-        // The ! operator tells TS that req.user is definitely available here due to the 'protect' middleware
-        res.status(200).json({ 
-            status: 'success', 
-            message: `Welcome, Admin ${req.user!.id}`,
-            user: req.user
-        });
-    }
+  '/admin-test',
+  protect,
+  authorize(UserRole.ADMIN),
+  (req: CustomRequest, res: Response) => {
+    res.status(200).json({
+      status: 'success',
+      message: `Welcome, Admin ${req.user!.id}`,
+      user: req.user
+    });
+  }
 );

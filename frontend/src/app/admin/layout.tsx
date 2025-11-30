@@ -1,12 +1,16 @@
-// src/app/admin/layout.tsx (FULL CORRECTED CODE - Applying AuthGuard)
+// frontend/src/app/admin/layout.tsx (FINAL CLEANED CODE - No Server Component Violations)
 
 import AdminLayout from '@/components/layout/AdminLayout';
 import AuthGuard from '@/components/layout/AuthGuard'; 
 import { UserRole } from '@/store/authSlice'; 
 
+// The unused/problematic imports are removed
+// import { usePathname } from 'next/navigation'; 
+// import { useEffect, useState } from 'react'; 
+
+
 /**
  * Layout for all pages under the /admin route group.
- * This layout enforces that only 'admin' roles can access these pages.
  */
 export default function AdminRouteLayout({
   children,
@@ -14,9 +18,8 @@ export default function AdminRouteLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // The AuthGuard will handle the role check and redirect away if non-admin/unauthenticated.
-    // If it passes, it renders the AdminLayout and children.
     <AuthGuard allowedRoles={['admin']}>
+        {/* We keep the clean AdminLayout structure */}
         <AdminLayout>
             {children}
         </AdminLayout>

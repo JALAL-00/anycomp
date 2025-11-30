@@ -1,4 +1,4 @@
-// src/context/AuthContext.tsx (RESTORED TO CORRECT AUTH PROVIDER LOGIC)
+// src/context/AuthContext.tsx (FINAL CORRECTED CODE)
 
 import React, { createContext, useContext } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -7,29 +7,26 @@ import {
     setCredentials, 
     logout as reduxLogout, 
     setAuthLoading, 
-    setAuthError 
+    setAuthError,
+    UserRole // <-- Import UserRole from slice to keep types synched
 } from '@/store/authSlice';
 import api from '@/lib/api';
 import { useRouter } from 'next/navigation';
 
-// Matches the backend structure
+// Matches the backend structure, uses the role from the slice
 interface LoginResponse {
     token: string;
-    user: { id: string, email: string, role: 'admin' | 'specialist' };
+    // FIX: Changed role to only reference the correct UserRole type from the slice
+    user: { id: string, email: string, role: UserRole }; 
 }
 
 interface AuthContextType {
     login: (email: string, password: string) => Promise<void>;
     logout: () => void;
-    // isAuthenticated, loading, user are available via Redux store
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-/**
- * Custom hook to use the AuthContext.
- * Uses NAMED EXPORT: { useAuth }
- */
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (context === undefined) {
@@ -38,16 +35,10 @@ export const useAuth = () => {
     return context;
 };
 
-
-/**
- * Provides the authentication state and actions to the entire application.
- * Uses NAMED EXPORT: { AuthProvider }
- */
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const dispatch = useDispatch<AppDispatch>();
     const router = useRouter(); 
 
-    // LOGIN Function (Remains the same)
     const login = async (email: string, password: string) => {
         dispatch(setAuthLoading(true));
         dispatch(setAuthError(null));
@@ -66,7 +57,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     };
     
-    // LOGOUT Function: Now handles redirection
     const handleLogout = () => {
         dispatch(reduxLogout()); 
         router.push('/login'); 

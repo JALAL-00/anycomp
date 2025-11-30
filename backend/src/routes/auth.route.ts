@@ -1,41 +1,30 @@
-// src/routes/auth.route.ts (FULL CORRECTED CODE with asyncHandler)
-
-import { Router, Response } from 'express'; // Removed Request, using CustomRequest
-import { CustomRequest } from '../types/Request'; // <-- NEW IMPORT
+import { Router, Response } from 'express';
+import { CustomRequest } from '../types/Request';
 import { registerUser, loginUser } from '../services/auth.service';
 import { ApiError } from '../middlewares/error.middleware';
 import { validate } from 'class-validator';
 import { User } from '../models/User';
-import asyncHandler from '../middlewares/async.middleware'; // <-- NEW IMPORT
+import asyncHandler from '../middlewares/async.middleware';
 
 const authRouter = Router();
 
-/**
- * @route POST /api/auth/register
- * @description Registers a new specialist user.
- * @access Public
- */
-authRouter.post('/register', asyncHandler(async (req: CustomRequest, res: Response) => { // <-- WRAPPED
+authRouter.post('/register', asyncHandler(async (req: CustomRequest, res: Response) => {
   const { email, password } = req.body;
 
-  // Simple input validation check
   if (!email || !password) {
     throw new ApiError(400, 'Email and password are required.');
   }
 
-  // Optional: More rigorous validation using User model (class-validator)
   const userToValidate = new User();
   userToValidate.email = email;
   userToValidate.password = password;
   const errors = await validate(userToValidate, { skipMissingProperties: true });
   if (errors.length > 0) {
-      throw new ApiError(400, errors.map(err => Object.values(err.constraints || {})).flat().join(', '));
+    throw new ApiError(400, errors.map(err => Object.values(err.constraints || {})).flat().join(', '));
   }
-
 
   const { user, token } = await registerUser(email, password);
 
-  // Return the user (excluding password) and the JWT token
   res.status(201).json({
     status: 'success',
     token,
@@ -43,17 +32,12 @@ authRouter.post('/register', asyncHandler(async (req: CustomRequest, res: Respon
       id: user.id,
       email: user.email,
       role: user.role,
-      is_active: user.is_active,
-    },
+      is_active: user.is_active
+    }
   });
 }));
 
-/**
- * @route POST /api/auth/login
- * @description Authenticates a user and returns a JWT token.
- * @access Public
- */
-authRouter.post('/login', asyncHandler(async (req: CustomRequest, res: Response) => { // <-- WRAPPED
+authRouter.post('/login', asyncHandler(async (req: CustomRequest, res: Response) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -69,8 +53,8 @@ authRouter.post('/login', asyncHandler(async (req: CustomRequest, res: Response)
       id: user.id,
       email: user.email,
       role: user.role,
-      is_active: user.is_active,
-    },
+      is_active: user.is_active
+    }
   });
 }));
 
