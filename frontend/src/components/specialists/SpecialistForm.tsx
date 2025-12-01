@@ -12,7 +12,6 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ProfessionalFeeCard from './ProfessionalFeeCard';
 import AdditionalOfferingsSection from './AdditionalOfferingsSection';
 import ProfileCardSection from './ProfileCardSection';
-import ConfirmationModal from '../ui/ConfirmationModal'; 
 import api from '@/lib/api';
 
 interface MediaPayload { file_name: string; mime_type: string; file_size: number; display_order: number; }

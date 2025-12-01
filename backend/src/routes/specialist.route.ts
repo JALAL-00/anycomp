@@ -9,9 +9,11 @@ import {
   deleteSpecialist, 
   publishSpecialist, 
   createOrUpdateSpecialistWithMedia,
-  deleteMediaForSpecialist
+  deleteMediaForSpecialist,
+  updateMediaSlot
 } from '../services/specialist.service';
 import asyncHandler from '../middlewares/async.middleware';
+import { ApiError } from '../middlewares/error.middleware'; // THIS LINE WAS MISSING
 
 const specialistRouter = Router();
 
@@ -60,6 +62,18 @@ specialistRouter.delete('/:id', asyncHandler(async (req: CustomRequest, res: Res
 specialistRouter.delete('/media/:mediaId', asyncHandler(async(req: CustomRequest, res: Response) => {
     await deleteMediaForSpecialist(req.params.mediaId);
     res.status(204).send();
+}));
+
+specialistRouter.put('/:id/media/:order', upload.single('image'), asyncHandler(async (req: CustomRequest, res: Response) => {
+    const { id, order } = req.params;
+    const file = req.file;
+
+    if (!file) {
+        throw new ApiError(400, 'Image file is required.');
+    }
+
+    const updatedMedia = await updateMediaSlot(id, parseInt(order, 10), file);
+    res.status(200).json({ status: 'success', data: updatedMedia });
 }));
 
 export default specialistRouter;

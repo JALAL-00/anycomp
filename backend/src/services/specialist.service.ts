@@ -10,6 +10,8 @@ import path from 'path';
 const specialistRepository = AppDataSource.getRepository(Specialist);
 const mediaRepository = AppDataSource.getRepository(Media); 
 
+const PLATFORM_FEE_RATE = 0.20; 
+
 const createUniqueSlug = async (title: string, id?: string): Promise<string> => {
   const baseSlug = slugify(title, { lower: true, strict: true });
   let slug = baseSlug;
@@ -29,17 +31,25 @@ const createUniqueSlug = async (title: string, id?: string): Promise<string> => 
 
 export const createOrUpdateSpecialistWithMedia = async (
     data: any,
-    files: Express.Multer.File[],
+    files: Express.Multer.File[] | undefined,
     mode: 'create' | 'update', 
     specialistId?: string
 ): Promise<Specialist> => {
     const parsedData: DeepPartial<Specialist> = {
-        ...data,
-        base_price: data.base_price ? parseFloat(data.base_price) : undefined,
-        platform_fee: data.platform_fee ? parseFloat(data.platform_fee) : undefined,
-        final_price: data.final_price ? parseFloat(data.final_price) : undefined,
-        duration_days: data.duration_days ? parseInt(data.duration_days, 10) : undefined,
+        title: data.title,
+        description: data.description,
+        base_price: data.base_price ? parseFloat(data.base_price) : 0,
+        duration_days: data.duration_days ? parseInt(data.duration_days, 10) : 1,
     };
+
+    if (parsedData.base_price) {
+        const basePrice = parsedData.base_price;
+        const platformFee = basePrice * PLATFORM_FEE_RATE;
+        const finalPrice = basePrice + platformFee;
+
+        parsedData.platform_fee = platformFee;
+        parsedData.final_price = finalPrice;
+    }
     
     return AppDataSource.manager.transaction(async (transactionalEntityManager) => {
         let specialist: Specialist;
@@ -55,7 +65,8 @@ export const createOrUpdateSpecialistWithMedia = async (
             if (parsedData.title && parsedData.title !== existing.title) {
                 parsedData.slug = await createUniqueSlug(parsedData.title, specialistId);
             }
-            specialist = transactionalEntityManager.merge(Specialist, existing, parsedData);
+            // CRITICAL FIX: Add 'as Specialist' to satisfy TypeScript's strict checks
+            specialist = transactionalEntityManager.merge(Specialist, existing, parsedData) as Specialist;
         }
 
         const savedSpecialist = await transactionalEntityManager.save(specialist); 
@@ -67,14 +78,13 @@ export const createOrUpdateSpecialistWithMedia = async (
                     file_name: serverUrl,
                     file_size: file.size,
                     mime_type: file.mimetype as any,
-                    display_order: index + 1,
+                    display_order: 99 + index, 
                     specialist_id: savedSpecialist.id 
                 });
             });
             await transactionalEntityManager.save(mediaEntities);
         }
         
-        // THIS IS THE CORRECTED LINE
         return transactionalEntityManager.findOneOrFail(Specialist, {
             where: { id: savedSpecialist.id },
             relations: ['media', 'service_offerings'],
@@ -162,4 +172,40 @@ export const publishSpecialist = async (id: string): Promise<Specialist> => {
   specialist.verification_status = VerificationStatus.APPROVED;
 
   return await specialistRepository.save(specialist);
+};
+
+export const updateMediaSlot = async (specialistId: string, displayOrder: number, file: Express.Multer.File): Promise<Media> => {
+    const specialist = await specialistRepository.findOneBy({ id: specialistId });
+    if (!specialist) {
+        throw new ApiError(404, 'Specialist not found');
+    }
+
+    let media = await mediaRepository.findOneBy({ specialist_id: specialistId, display_order: displayOrder });
+
+    if (media && media.file_name) {
+        try {
+            const oldFilename = path.basename(media.file_name);
+            await fs.unlink(path.join(__dirname, '../../public/uploads', oldFilename));
+        } catch (err) {
+            console.error("Old file not found, continuing...", err);
+        }
+    }
+
+    const serverUrl = `http://localhost:${process.env.PORT || 5002}/uploads/${file.filename}`;
+
+    if (media) {
+        media.file_name = serverUrl;
+        media.file_size = file.size;
+        media.mime_type = file.mimetype as any;
+    } else {
+        media = mediaRepository.create({
+            specialist_id: specialistId,
+            display_order: displayOrder,
+            file_name: serverUrl,
+            file_size: file.size,
+            mime_type: file.mimetype as any,
+        });
+    }
+
+    return mediaRepository.save(media);
 };

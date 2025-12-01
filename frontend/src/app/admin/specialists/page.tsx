@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '@/store/store';
-import { usePathname } from 'next/navigation';
+import { usePathname } from 'next/navigation'; // Import usePathname
 import { fetchSpecialists } from '@/lib/dataFetcher';
 import SpecialistFilter from '@/components/specialists/SpecialistFilter';
 import SpecialistTable from '@/components/specialists/SpecialistTable';
@@ -16,13 +16,10 @@ export default function SpecialistsPage() {
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
-    // This now works because AuthGuard waits.
-    // We also add 'pathname' as a dependency. When you navigate from /create back to this page,
-    // the hook will re-run and fetch the new list.
     if (isAuthenticated) {
       dispatch(fetchSpecialists({ filter, search, page, limit }));
     }
-  }, [filter, search, page, limit, dispatch, isAuthenticated, pathname]);
+  }, [filter, search, page, limit, dispatch, isAuthenticated, pathname]); // Add pathname here
 
   return (
     <div className="space-y-6">
