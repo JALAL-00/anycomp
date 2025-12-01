@@ -1,25 +1,12 @@
-// frontend/src/app/admin/layout.tsx (FINAL CLEANED CODE - No Server Component Violations)
+'use client';
 
 import AdminLayout from '@/components/layout/AdminLayout';
-import AuthGuard from '@/components/layout/AuthGuard'; 
-import { UserRole } from '@/store/authSlice'; 
+import AuthGuard from '@/components/layout/AuthGuard';
 
-// The unused/problematic imports are removed
-// import { usePathname } from 'next/navigation'; 
-// import { useEffect, useState } from 'react'; 
-
-
-/**
- * Layout for all pages under the /admin route group.
- */
-export default function AdminRouteLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function AdminRouteLayout({ children }: { children: React.ReactNode }) {
+  // AuthGuard now handles everything internally
   return (
-    <AuthGuard allowedRoles={['admin']}>
-        {/* We keep the clean AdminLayout structure */}
+    <AuthGuard>
         <AdminLayout>
             {children}
         </AdminLayout>

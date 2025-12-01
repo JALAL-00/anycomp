@@ -1,10 +1,11 @@
-// src/store/specialistSlice.ts
-
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-// --- Type Definitions (Frontend Schema) ---
+export interface Media {
+    id: string;
+    file_name: string;
+    display_order: number;
+}
 
-// Corresponds to the Specialist entity from the backend (simplified for the frontend)
 export interface Specialist {
     id: string;
     title: string;
@@ -13,38 +14,34 @@ export interface Specialist {
     platform_fee: number | null;
     final_price: number | null;
     duration_days: number;
-    is_draft: boolean; // true=Draft, false=Published
+    is_draft: boolean;
     verification_status: 'pending' | 'approved' | 'rejected';
-    // Mocked/Calculated fields for the table display:
+    slug: string;
+    media: Media[];
     purchases: number; 
 }
 
-// State for the All Specialists page (Page 1 Requirements)
 interface SpecialistState {
     list: Specialist[];
     total: number;
     page: number;
     limit: number;
-    filter: 'All' | 'Drafts' | 'Published'; // Page 1 requirement
-    search: string; // Page 1 requirement
+    filter: 'All' | 'Drafts' | 'Published';
+    search: string;
     loading: boolean;
     error: string | null;
 }
 
-// Initial State (Defaulting to Page 1 view)
 const initialState: SpecialistState = {
     list: [],
     total: 0,
     page: 1,
-    limit: 10, // Page 1 requirement: pagination when rows >= 10
+    limit: 10,
     filter: 'All', 
     search: '',
     loading: false,
     error: null,
 };
-
-
-// --- Slice Implementation ---
 
 const specialistSlice = createSlice({
     name: 'specialist',
@@ -66,11 +63,11 @@ const specialistSlice = createSlice({
         },
         setFilter(state, action: PayloadAction<'All' | 'Drafts' | 'Published'>) {
             state.filter = action.payload;
-            state.page = 1; // Reset page on filter change
+            state.page = 1;
         },
         setSearch(state, action: PayloadAction<string>) {
             state.search = action.payload;
-            state.page = 1; // Reset page on search change
+            state.page = 1;
         },
         setPage(state, action: PayloadAction<number>) {
             state.page = action.payload;

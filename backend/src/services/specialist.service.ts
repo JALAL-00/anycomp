@@ -2,8 +2,10 @@ import { AppDataSource } from '../db/data-source';
 import { Specialist, VerificationStatus } from '../models/Specialist';
 import { Media } from '../models/Media'; 
 import { ApiError } from '../middlewares/error.middleware';
-import { FindManyOptions, QueryFailedError, DeepPartial } from 'typeorm'; 
+import { DeepPartial } from 'typeorm'; 
 import slugify from 'slugify';
+import fs from 'fs/promises';
+import path from 'path';
 
 const specialistRepository = AppDataSource.getRepository(Specialist);
 const mediaRepository = AppDataSource.getRepository(Media); 
@@ -25,61 +27,58 @@ const createUniqueSlug = async (title: string, id?: string): Promise<string> => 
   }
 };
 
-/**
- * Handles specialist creation/update with nested media and service offerings.
- * It is marked for internal use, replacing the old createSpecialist/updateSpecialist.
- */
 export const createOrUpdateSpecialistWithMedia = async (
-    data: DeepPartial<Specialist> & { media?: DeepPartial<Media>[] },
+    data: any,
+    files: Express.Multer.File[],
     mode: 'create' | 'update', 
     specialistId?: string
 ): Promise<Specialist> => {
-    // Start a transaction for integrity
+    const parsedData: DeepPartial<Specialist> = {
+        ...data,
+        base_price: data.base_price ? parseFloat(data.base_price) : undefined,
+        platform_fee: data.platform_fee ? parseFloat(data.platform_fee) : undefined,
+        final_price: data.final_price ? parseFloat(data.final_price) : undefined,
+        duration_days: data.duration_days ? parseInt(data.duration_days, 10) : undefined,
+    };
+    
     return AppDataSource.manager.transaction(async (transactionalEntityManager) => {
-        
         let specialist: Specialist;
-        let savedSpecialist: Specialist;
 
-        // 1. HANDLE SPECIALIST ENTITY
         if (mode === 'create') {
-            data.slug = await createUniqueSlug(data.title!);
-            // Ensure data is treated as the correct type after creation
-            specialist = transactionalEntityManager.create(Specialist, data) as Specialist; 
+            parsedData.slug = await createUniqueSlug(parsedData.title!);
+            specialist = transactionalEntityManager.create(Specialist, parsedData); 
         } else {
             const existing = await transactionalEntityManager.findOneBy(Specialist, { id: specialistId });
             if (!existing) {
                 throw new ApiError(404, `Specialist with ID ${specialistId} not found.`);
             }
-            if (data.title && data.title !== existing.title) {
-                data.slug = await createUniqueSlug(data.title, specialistId);
+            if (parsedData.title && parsedData.title !== existing.title) {
+                parsedData.slug = await createUniqueSlug(parsedData.title, specialistId);
             }
-            // Ensure data is treated as the correct type after merging
-            specialist = transactionalEntityManager.merge(Specialist, existing, data) as Specialist;
+            specialist = transactionalEntityManager.merge(Specialist, existing, parsedData);
         }
 
-        // SAVE SPECIALIST - Returns the fully saved entity with guaranteed ID
-        savedSpecialist = await transactionalEntityManager.save(Specialist, specialist); 
+        const savedSpecialist = await transactionalEntityManager.save(specialist); 
         
-        // 2. HANDLE MEDIA ENTITIES (Delete old media and create new ones)
-        if (specialistId) {
-            await transactionalEntityManager.delete(Media, { specialist_id: specialistId }); 
-        }
-        
-        if (data.media && data.media.length > 0) {
-            const mediaEntities = data.media.map(mediaData => 
-                transactionalEntityManager.create(Media, { 
-                    ...mediaData, 
+        if (files && files.length > 0) {
+            const mediaEntities = files.map((file, index) => {
+                const serverUrl = `http://localhost:${process.env.PORT || 5002}/uploads/${file.filename}`;
+                return transactionalEntityManager.create(Media, { 
+                    file_name: serverUrl,
+                    file_size: file.size,
+                    mime_type: file.mimetype as any,
+                    display_order: index + 1,
                     specialist_id: savedSpecialist.id 
-                })
-            );
-            await transactionalEntityManager.save(Media, mediaEntities); 
+                });
+            });
+            await transactionalEntityManager.save(mediaEntities);
         }
         
-        // 3. RETURN FINAL ENTITY with its relations (Guaranteed ID is used)
-        return transactionalEntityManager.findOne(Specialist, {
+        // THIS IS THE CORRECTED LINE
+        return transactionalEntityManager.findOneOrFail(Specialist, {
             where: { id: savedSpecialist.id },
             relations: ['media', 'service_offerings'],
-        }) as Promise<Specialist>;
+        });
     });
 };
 
@@ -88,8 +87,19 @@ export const getSpecialistById = async (id: string): Promise<Specialist> => {
     where: { id, deleted_at: null as any },
     relations: ['media', 'service_offerings']
   });
-
   if (!specialist) throw new ApiError(404, `Specialist with ID ${id} not found.`);
+  return specialist;
+};
+
+export const getSpecialistBySlug = async (slug: string): Promise<Specialist> => {
+  const specialist = await specialistRepository.findOne({
+    where: { slug, deleted_at: null as any },
+    relations: ['media', 'service_offerings'],
+  });
+
+  if (!specialist) {
+    throw new ApiError(404, `Specialist with slug '${slug}' not found.`);
+  }
   return specialist;
 };
 
@@ -99,39 +109,49 @@ export const getAllSpecialists = async (
   page: number = 1,
   limit: number = 10
 ): Promise<{ data: Specialist[], total: number, page: number, limit: number }> => {
-  const where: any = { deleted_at: null };
+  
+  const query = specialistRepository.createQueryBuilder('specialist');
+  query.where('specialist.deleted_at IS NULL');
 
-  if (filter === 'Drafts') where.is_draft = true;
-  else if (filter === 'Published') where.is_draft = false;
-
-  if (search) {
-    const [data, total] = await specialistRepository
-      .createQueryBuilder('specialist')
-      .where(where)
-      .andWhere('(LOWER(specialist.title) LIKE LOWER(:search) OR LOWER(specialist.description) LIKE LOWER(:search) OR LOWER(specialist.slug) LIKE LOWER(:search))', { search: `%${search}%` })
-      .offset((page - 1) * limit)
-      .limit(limit)
-      .orderBy('specialist.created_at', 'DESC')
-      .getManyAndCount();
-
-    return { data, total, page, limit };
+  if (filter === 'Drafts') {
+    query.andWhere('specialist.is_draft = :is_draft', { is_draft: true });
+  } else if (filter === 'Published') {
+    query.andWhere('specialist.is_draft = :is_draft', { is_draft: false });
   }
 
-  const findOptions: FindManyOptions<Specialist> = {
-    where,
-    relations: ['media'],
-    order: { created_at: 'DESC' },
-    skip: (page - 1) * limit,
-    take: limit
-  };
+  if (search) {
+      query.andWhere('(LOWER(specialist.title) LIKE LOWER(:search) OR LOWER(specialist.description) LIKE LOWER(:search))', { search: `%${search}%` });
+  }
 
-  const [data, total] = await specialistRepository.findAndCount(findOptions);
+  query.orderBy('specialist.created_at', 'DESC')
+     .skip((page - 1) * limit)
+     .take(limit);
+
+  const [data, total] = await query.getManyAndCount();
   return { data, total, page, limit };
 };
 
 export const deleteSpecialist = async (id: string): Promise<void> => {
   const deleteResult = await specialistRepository.softDelete(id);
-  if (deleteResult.affected === 0) throw new ApiError(404, `Specialist with ID ${id} not found for deletion.`);
+  if (deleteResult.affected === 0) throw new ApiError(404, `Specialist with ID ${id} not found.`);
+};
+
+export const deleteMediaForSpecialist = async (mediaId: string): Promise<void> => {
+    const media = await mediaRepository.findOneBy({ id: mediaId });
+    if (!media) {
+        throw new ApiError(404, 'Media not found');
+    }
+
+    try {
+        const urlParts = media.file_name.split('/');
+        const filename = urlParts[urlParts.length - 1];
+        const filePath = path.join(__dirname, '../../public/uploads', filename);
+        await fs.unlink(filePath);
+    } catch (err) {
+        console.error('Failed to delete file from disk:', err);
+    }
+    
+    await mediaRepository.delete(mediaId);
 };
 
 export const publishSpecialist = async (id: string): Promise<Specialist> => {

@@ -1,4 +1,3 @@
-// src/components/specialists/ProfessionalFeeCard.tsx (NEW FILE)
 'use client';
 
 import React from 'react';
@@ -12,9 +11,6 @@ interface ProfessionalFeeCardProps {
     onBasePriceChange: (price: number) => void;
 }
 
-/**
- * Fixed price panel on the right side of the Create/Edit form (Matching Figma).
- */
 const ProfessionalFeeCard: React.FC<ProfessionalFeeCardProps> = ({ 
     basePrice, serviceFee, totalFee, yourReturns, onBasePriceChange 
 }) => {
@@ -23,9 +19,8 @@ const ProfessionalFeeCard: React.FC<ProfessionalFeeCardProps> = ({
             <Typography variant="h6" className="font-semibold text-text-primary mb-2">Professional Fee</Typography>
             <Typography variant="body2" className="text-zinc-500 mb-4">Set a rate for your service</Typography>
 
-            {/* Main Price Display (Large RM) */}
             <Typography variant="h4" className="font-bold text-primary-dark mb-4 text-center">
-                RM {basePrice.toLocaleString('en-MY')}
+                RM {(basePrice || 0).toLocaleString('en-MY')}
             </Typography>
 
             <TextField
@@ -34,8 +29,14 @@ const ProfessionalFeeCard: React.FC<ProfessionalFeeCardProps> = ({
                 name="base_price"
                 type="number"
                 variant="outlined"
-                value={basePrice}
-                onChange={(e) => onBasePriceChange(parseFloat(e.target.value))}
+                value={basePrice === 0 ? '' : basePrice}
+                onChange={(e) => {
+                    const value = e.target.value;
+                    const numericValue = value === '' ? 0 : parseFloat(value);
+                    if (!isNaN(numericValue)) {
+                        onBasePriceChange(numericValue);
+                    }
+                }}
                 InputProps={{
                     startAdornment: <InputAdornment position="start">RM</InputAdornment>,
                 }}
@@ -44,23 +45,22 @@ const ProfessionalFeeCard: React.FC<ProfessionalFeeCardProps> = ({
 
             <Divider sx={{ mb: 2 }} />
 
-            {/* Breakdown */}
             <div className='space-y-3'>
                 <div className='flex justify-between text-sm text-zinc-700'>
                     <Typography component="span" className='font-medium'>Base price</Typography>
-                    <Typography component="span">RM {basePrice.toFixed(2)}</Typography>
+                    <Typography component="span">RM {(basePrice || 0).toFixed(2)}</Typography>
                 </div>
                 <div className='flex justify-between text-sm text-zinc-700'>
                     <Typography component="span" className='font-medium'>Service processing fee</Typography>
-                    <Typography component="span">RM {serviceFee.toFixed(2)}</Typography>
+                    <Typography component="span">RM {(serviceFee || 0).toFixed(2)}</Typography>
                 </div>
                 <div className='flex justify-between text-sm font-semibold text-text-primary'>
                     <Typography component="span">Total</Typography>
-                    <Typography component="span">RM {totalFee.toFixed(2)}</Typography>
+                    <Typography component="span">RM {(totalFee || 0).toFixed(2)}</Typography>
                 </div>
                 <div className='flex justify-between text-sm font-semibold text-green-600'>
                     <Typography component="span">Your returns</Typography>
-                    <Typography component="span">RM {yourReturns.toFixed(2)}</Typography>
+                    <Typography component="span">RM {(yourReturns || 0).toFixed(2)}</Typography>
                 </div>
             </div>
         </Paper>

@@ -1,10 +1,9 @@
-// frontend/src/components/specialists/SpecialistForm.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { 
     TextField, Typography, Button, CircularProgress, Select, 
-    MenuItem, FormControl, InputLabel, IconButton // Added missing import
+    MenuItem, FormControl, InputLabel, IconButton
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
@@ -34,11 +33,10 @@ interface SpecialistFormProps {
     specialistId?: string; 
 }
 
-// Media Slot Interface
 interface MediaSlot {
     file: File | null;
     preview: string | null;
-    id: number; // 1, 2, 3
+    id: number;
 }
 
 const SpecialistForm: React.FC<SpecialistFormProps> = ({ mode, specialistId }) => {
@@ -48,7 +46,6 @@ const SpecialistForm: React.FC<SpecialistFormProps> = ({ mode, specialistId }) =
     const [submissionError, setSubmissionError] = useState<string | null>(null);
     const [showPublishModal, setShowPublishModal] = useState(false);
 
-    // Three Media Slots Logic
     const [mediaSlots, setMediaSlots] = useState<MediaSlot[]>([
         { id: 1, file: null, preview: null },
         { id: 2, file: null, preview: null },
@@ -60,59 +57,24 @@ const SpecialistForm: React.FC<SpecialistFormProps> = ({ mode, specialistId }) =
     const totalFee = formData.base_price + serviceFee;
     const yourReturns = totalFee * (1 - SERVICE_FEE_RATE);
 
-    // --- FETCH DATA FOR EDIT MODE ---
     useEffect(() => {
         if (mode === 'edit' && specialistId && formData.title === '') { 
-            setLoading(true);
-            const fetchData = async () => {
-                try {
-                    const response = await api.get(`/specialists/${specialistId}`);
-                    const data = response.data.data;
-
-                    setFormData({
-                        title: data.title,
-                        description: data.description,
-                        base_price: data.base_price ? parseFloat(data.base_price) : 0,
-                        duration_days: data.duration_days,
-                        is_draft: data.is_draft,
-                        category: 'Incorporation', 
-                        completion_time_label: `${data.duration_days} Days`
-                    });
-
-                    // Load MOCK images into slots based on existence of backend data
-                    if (data.media && data.media.length > 0) {
-                        const newSlots = [...mediaSlots];
-                        // If data exists, mock populating slots with dummy images since real file storage isn't implemented
-                        newSlots[0].preview = "https://via.placeholder.com/400x300/E0E0E0/222222?text=Image+1";
-                        if(data.media.length > 1) newSlots[1].preview = "https://via.placeholder.com/400x300/E0E0E0/222222?text=Image+2";
-                        if(data.media.length > 2) newSlots[2].preview = "https://via.placeholder.com/400x300/E0E0E0/222222?text=Image+3";
-                        setMediaSlots(newSlots);
-                    }
-
-                } catch (error) {
-                    console.error('Fetch Error:', error);
-                    setSubmissionError('Failed to load specialist data.');
-                    router.push('/admin/specialists');
-                } finally {
-                    setLoading(false);
-                }
-            };
-            fetchData();
+            // This component is now only for CREATE mode, so this block is not strictly necessary but kept for safety.
+            router.push('/admin/specialists'); // Redirect if accessed incorrectly
         }
-    }, [mode, specialistId, router]); // Dependency array
+    }, [mode, specialistId, router]);
 
-    // HANDLERS
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: name === 'base_price' ? parseFloat(value) : value }));
+        const numericValue = (name === 'base_price' || name === 'duration_days') ? parseFloat(value) || 0 : value;
+        setFormData(prev => ({ ...prev, [name]: numericValue }));
     };
 
-    const handleSelectChange = (e: any) => { // SelectChangeEvent generic handling
+    const handleSelectChange = (e: any) => {
          const { name, value } = e.target;
          setFormData(prev => ({ ...prev, [name]: value }));
     }
 
-    // Single File Handler per Slot
     const handleFileChange = (slotId: number, e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
@@ -128,127 +90,67 @@ const SpecialistForm: React.FC<SpecialistFormProps> = ({ mode, specialistId }) =
         setMediaSlots(prev => prev.map(slot => slot.id === slotId ? { ...slot, file: null, preview: null } : slot));
     };
 
-    const handleFormSubmit = async (e?: React.FormEvent, publishAction: boolean = false) => {
+    const handleFormSubmit = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
         setLoading(true);
         setSubmissionError(null);
 
+        const submissionPayload = new FormData();
+        submissionPayload.append('title', formData.title);
+        submissionPayload.append('description', formData.description);
+        submissionPayload.append('base_price', String(formData.base_price));
+        submissionPayload.append('duration_days', String(formData.duration_days));
+        submissionPayload.append('platform_fee', String(serviceFee));
+        submissionPayload.append('final_price', String(totalFee));
+
+        mediaSlots.forEach(slot => {
+            if(slot.file) {
+                submissionPayload.append('images', slot.file);
+            }
+        });
+        
         try {
-            // Validation
-            if (!formData.title || !formData.description) {
-                 throw new Error('Title and description are required.');
-            }
-
-            // Construct Media Payload
-            const mediaPayload: MediaPayload[] = mediaSlots
-                .filter(s => s.file || s.preview) // Has file or existing preview
-                .map((s, i) => ({
-                    file_name: s.file ? s.file.name : `existing_img_${i}.png`, 
-                    mime_type: s.file ? s.file.type : 'image/png', 
-                    file_size: s.file ? s.file.size : 1024, 
-                    display_order: i + 1 
-                }));
-
-            const submissionData = {
-                ...formData,
-                media: mediaPayload
-            };
-
-            const url = mode === 'edit' ? `/specialists/${specialistId}` : '/specialists';
-            let response; 
+            await api.post('/specialists', submissionPayload, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            router.push('/admin/specialists');
             
-            if (mode === 'create') {
-                response = await api.post(url, submissionData);
-            } else {
-                response = await api.put(url, submissionData);
-            }
-            
-            const savedId = response.data.data.id;
-
-            if (publishAction) {
-                await api.patch(`/specialists/${savedId}/publish`);
-                setFormData(prev => ({ ...prev, is_draft: false }));
-            }
-            
-            if (mode === 'create') {
-                router.push(`/admin/specialists/edit/${savedId}`);
-            }
-
         } catch (error: any) {
-            setSubmissionError(typeof error === 'string' ? error : error?.message || 'Error occurred');
+            setSubmissionError(error?.message || 'An error occurred during creation.');
         } finally {
             setLoading(false);
-            setShowPublishModal(false);
         }
     };
 
-    const triggerPublishFlow = () => {
-        if(mode === 'create' || !specialistId) {
-             alert('Please save the specialist before publishing.');
-             return;
-        }
-        setShowPublishModal(true);
-    };
-
-    if (loading && mode === 'edit' && formData.title === '') return <CircularProgress className="m-10"/>; 
-    
     return (
         <div className="min-h-full pb-20">
-            {/* Modal */}
-            <ConfirmationModal 
-                open={showPublishModal}
-                title="Publish changes"
-                message="Do you want to publish these changes? It will appear in the marketplace listing"
-                onCancel={() => setShowPublishModal(false)}
-                onConfirm={() => handleFormSubmit(undefined, true)}
-                confirmText="Save changes"
-            />
-
-            {/* Header */}
             <div className="flex items-center justify-between sticky top-0 bg-white pt-2 pb-6 z-10 border-b border-dashed border-zinc-200 mb-6">
                 <Typography variant="h5" className="text-3xl font-semibold text-text-primary font-sans">
-                   {formData.title || 'New Service Listing'}
+                   {formData.title || 'Create New Service'}
                 </Typography>
-                
                 <div className="flex space-x-2">
                     <Button 
-                        variant="outlined" 
-                        onClick={() => handleFormSubmit()} 
-                        disabled={loading}
-                        sx={{ borderRadius: '6px', borderColor: '#D1D5DB' }}
-                    >
-                        Save
-                    </Button>
-                    <Button 
                         variant="contained" 
-                        onClick={triggerPublishFlow}
-                        disabled={loading || mode === 'create' || !formData.is_draft} 
-                        sx={{ 
-                            borderRadius: '6px', 
-                            bgcolor: formData.is_draft ? '#00244F' : '#4CAF50', 
-                            '&:hover': { bgcolor: formData.is_draft ? '#0D47A1' : '#388E3C' }
-                        }}
+                        onClick={handleFormSubmit}
+                        disabled={loading}
+                        sx={{ borderRadius: '6px', bgcolor: '#00244F' }}
                     >
-                        {formData.is_draft ? 'Publish' : 'Published'}
+                        {loading ? <CircularProgress size={24} color="inherit" /> : 'Save & Create'}
                     </Button>
                 </div>
             </div>
             
-            <form className="flex space-x-8">
-                {/* LEFT: Inputs */}
+            <form className="flex space-x-8" onSubmit={handleFormSubmit}>
                 <div className="flex-1 space-y-10 max-w-4xl">
-                    
                     {submissionError && <Typography color="error" className='p-3 border border-red-200 bg-red-50 rounded'>{submissionError}</Typography>}
 
                     <div className='space-y-4'>
                         <Typography className='uppercase text-xs font-bold text-zinc-400 tracking-wide'>Service Details</Typography>
-                        <TextField fullWidth label="Service Title" name="title" value={formData.title} onChange={handleInputChange} sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px' } }} />
-                    
-                        <TextField fullWidth multiline rows={4} label="Description" name="description" value={formData.description} onChange={handleInputChange} sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}/>
+                        <TextField fullWidth required label="Service Title" name="title" value={formData.title} onChange={handleInputChange} sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px' } }} />
+                        <TextField fullWidth required multiline rows={4} label="Description" name="description" value={formData.description} onChange={handleInputChange} sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}/>
                         <div className="text-right text-xs text-zinc-400">(500 words)</div>
                     </div>
                     
-                    {/* Time & Category Row */}
                     <div className='flex space-x-4'>
                          <FormControl fullWidth>
                             <InputLabel>Estimated Completion Time</InputLabel>
@@ -281,7 +183,6 @@ const SpecialistForm: React.FC<SpecialistFormProps> = ({ mode, specialistId }) =
                          </FormControl>
                     </div>
 
-                    {/* Image Upload Grid - Module 3 Style (3 Boxes) */}
                     <div className="space-y-2">
                          <Typography className='font-semibold'>Service Images</Typography>
                          <div className="flex space-x-4">
@@ -321,7 +222,6 @@ const SpecialistForm: React.FC<SpecialistFormProps> = ({ mode, specialistId }) =
                     <ProfileCardSection />
                 </div>
 
-                {/* RIGHT: Price Panel */}
                 <div className="w-[320px] flex-shrink-0">
                     <ProfessionalFeeCard 
                         basePrice={formData.base_price}

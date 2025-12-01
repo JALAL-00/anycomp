@@ -1,26 +1,22 @@
-// src/app/providers.tsx (FULL CORRECTED CODE)
 'use client';
 
 import { Provider } from 'react-redux';
 import { store } from '../store/store';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-// FIX: Changed to NAMED IMPORT { AuthProvider }
 import { AuthProvider } from '@/context/AuthContext'; 
+import { useAuthSession } from '@/hooks/useAuthSession';
 
-
-// Define the custom MUI Theme (MUI uses its own system, but we align colors)
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#0A66C2', // primary-blue
+      main: '#0A66C2',
     },
     secondary: {
-      main: '#222222', // text-primary
+      main: '#222222',
     },
   },
   typography: {
-    // Note: We use Tailwind for custom fonts, but MUI needs a fallback
     fontFamily: [
       '"Red Hat Display"',
       'Roboto',
@@ -30,20 +26,20 @@ const theme = createTheme({
   },
 });
 
-interface ProvidersProps {
-  children: React.ReactNode;
+function AuthInitializer({ children }: { children: React.ReactNode }) {
+    const isSessionChecked = useAuthSession();
+    return isSessionChecked ? <>{children}</> : null;
 }
 
-/**
- * Global component to provide all necessary contexts (Redux, MUI Theme, Auth)
- */
-export function Providers({ children }: ProvidersProps) {
+export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <Provider store={store}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <AuthProvider> {/* AuthProvider is correctly placed here */}
-          {children}
+        <AuthProvider>
+          <AuthInitializer>
+            {children}
+          </AuthInitializer>
         </AuthProvider>
       </ThemeProvider>
     </Provider>

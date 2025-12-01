@@ -1,4 +1,3 @@
-// src/components/specialists/SpecialistActions.tsx (NEW FILE)
 'use client';
 
 import React, { useState } from 'react';
@@ -10,20 +9,17 @@ import Link from 'next/link';
 
 interface SpecialistActionsProps {
     specialistId: string;
-    // We only implement Edit/Delete/Publish here, the logic for delete/publish 
-    // will be added in Module 5 (the logic is handled via forms/patches).
+    slug: string; // Add slug to the props
     onDelete: (id: string) => void;
 }
 
-/**
- * Renders the Edit/Delete/Publish action menu for a specialist table row.
- * Matches the Figma's dropdown menu visual.
- */
-const SpecialistActions: React.FC<SpecialistActionsProps> = ({ specialistId, onDelete }) => {
+const SpecialistActions: React.FC<SpecialistActionsProps> = ({ specialistId, slug, onDelete }) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+        // Stop the row's onClick event from firing when the menu is opened
+        event.stopPropagation(); 
         setAnchorEl(event.currentTarget);
     };
 
@@ -33,7 +29,6 @@ const SpecialistActions: React.FC<SpecialistActionsProps> = ({ specialistId, onD
 
     const handleDelete = () => {
         handleClose();
-        // Prompt for confirmation before calling delete (best UX practice)
         if (window.confirm('Are you sure you want to delete this specialist?')) {
              onDelete(specialistId);
         }
@@ -47,7 +42,6 @@ const SpecialistActions: React.FC<SpecialistActionsProps> = ({ specialistId, onD
                 aria-controls={open ? 'specialist-menu' : undefined}
                 aria-haspopup="true"
                 aria-expanded={open ? 'true' : undefined}
-                sx={{ color: 'var(--tw-colors-text-primary)' }}
             >
                 <MoreVertIcon />
             </IconButton>
@@ -60,29 +54,27 @@ const SpecialistActions: React.FC<SpecialistActionsProps> = ({ specialistId, onD
                 onClick={handleClose}
                 transformOrigin={{ horizontal: 'right', vertical: 'top' }}
                 anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-                // Custom styles to match the menu drop shadow and corner radius
                 PaperProps={{
                     elevation: 1,
                     sx: {
                         borderRadius: '8px', 
                         minWidth: '150px',
+                        boxShadow: '0px 4px 12px rgba(0,0,0,0.1)',
                         mt: 0.5,
-                        // Ensure the drop shadow is visible
                     },
                 }}
             >
-                {/* Edit Action (Navigates to Page 3: /admin/specialists/edit/:id) */}
-                <MenuItem component={Link} href={`/admin/specialists/edit/${specialistId}`}>
+                {/* CRITICAL CHANGE: Update the href to point to the service detail page */}
+                <MenuItem component={Link} href={`/admin/services/${slug}`}>
                     <ListItemIcon>
                         <EditIcon fontSize="small" />
                     </ListItemIcon>
                     <ListItemText>Edit</ListItemText>
                 </MenuItem>
                 
-                {/* Delete Action */}
-                <MenuItem onClick={handleDelete} className='text-red-600'>
+                <MenuItem onClick={handleDelete} sx={{ color: 'error.main' }}>
                     <ListItemIcon>
-                        <DeleteIcon fontSize="small" className='text-red-600' />
+                        <DeleteIcon fontSize="small" color="error" />
                     </ListItemIcon>
                     <ListItemText>Delete</ListItemText>
                 </MenuItem>

@@ -3,6 +3,7 @@ import 'reflect-metadata';
 import express, { Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import path from 'path';
 import { initializeDatabase, AppDataSource } from './db/data-source';
 import { errorHandler, notFoundHandler } from './middlewares/error.middleware';
 import baseRouter from './routes/index';
@@ -22,6 +23,8 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 app.use(express.json());
+
+app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 
 app.use('/api/auth', authRouter);
 app.use('/api/specialists', specialistRouter);
@@ -43,6 +46,7 @@ const startServer = async () => {
   app.listen(PORT, () => {
     console.log(` Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
     console.log(` API Base URL: http://localhost:${PORT}/api`);
+    console.log(` Serving static files from: http://localhost:${PORT}/uploads`);
   });
 };
 
