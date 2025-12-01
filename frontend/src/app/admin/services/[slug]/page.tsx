@@ -7,7 +7,7 @@ import { Specialist as SpecialistType } from '@/store/specialistSlice';
 import EditServiceDrawer from '@/components/specialists/EditServiceDrawer';
 import AdditionalOfferingsSection from '@/components/specialists/AdditionalOfferingsSection';
 import ProfileCardSection from '@/components/specialists/ProfileCardSection';
-import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
+import ConfirmationModal from '@/components/ui/ConfirmationModal'; // Corrected Import Path
 import api from '@/lib/api';
 
 const EditableImage = ({ src, alt, onImageUpload }: { src?: string; alt: string; onImageUpload: (file: File) => void; }) => {
@@ -112,9 +112,10 @@ export default function ServiceDetailsPage() {
     const handlePublish = async () => {
         if (!service) return;
         try {
-            const response = await api.patch(`/specialists/${service.id}/publish`);
-            setService(response.data.data); // Update local state with the returned object
+            await api.patch(`/specialists/${service.id}/publish`);
             setPublishModalOpen(false);
+            // Navigate to the public specialists page on success
+            router.push('/specialists');
         } catch (err) {
             console.error("Publish failed", err);
             alert("Failed to publish the service. Please try again.");

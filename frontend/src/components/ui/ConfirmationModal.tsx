@@ -14,7 +14,7 @@ interface ConfirmationModalProps {
     cancelText?: string;
 }
 
-export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
+const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
     open,
     title,
     message,
@@ -66,3 +66,5 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         </Dialog>
     );
 };
+
+export default ConfirmationModal;
