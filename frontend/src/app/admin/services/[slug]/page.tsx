@@ -47,8 +47,10 @@ export default function ServiceDetailsPage() {
     if (error) return <Typography color="error" className="text-center">{error}</Typography>;
     if (!service) return <Typography className="text-center">Service not found.</Typography>;
 
-    const primaryImage = service.media?.[0]?.file_name;
-    const secondaryImages = service.media?.slice(1, 3) || [];
+    // CRITICAL FIX: Sort media by display_order and map to URLs safely
+    const sortedMedia = service.media?.sort((a, b) => a.display_order - b.display_order) || [];
+    const primaryImage = sortedMedia[0]?.file_name;
+    const secondaryImages = sortedMedia.slice(1, 3);
 
     const basePriceNum = parseFloat(String(service.base_price) || '0');
     const platformFeeNum = parseFloat(String(service.platform_fee) || '0');
@@ -58,26 +60,41 @@ export default function ServiceDetailsPage() {
         <div className="pb-20">
             {isDrawerOpen && <EditServiceDrawer service={service} open={isDrawerOpen} onClose={() => setDrawerOpen(false)} onSaveSuccess={handleEditSuccess} />}
             
-            {/* The incorrect header block has been removed from this section */}
             <div className="flex justify-between items-center mb-6">
                 <Typography variant="h4" className="font-bold text-text-primary">
                     {service.title}
                 </Typography>
                 <div className="flex space-x-3">
-                    <Button variant="outlined" sx={{ borderRadius: '6px', borderColor: '#00244F', color: '#00244F' }} onClick={() => setDrawerOpen(true)}>Edit</Button>
-                    <Button variant="contained" sx={{ borderRadius: '6px', bgcolor: '#00244F' }}>Publish</Button>
+                    <Button variant="outlined" sx={{ borderRadius: '6px', borderColor: '#00244F', color: '#00244F', textTransform: 'none' }} onClick={() => setDrawerOpen(true)}>Edit</Button>
+                    <Button variant="contained" sx={{ borderRadius: '6px', bgcolor: '#00244F', textTransform: 'none' }}>Publish</Button>
                 </div>
             </div>
 
             <div className="grid grid-cols-12 gap-8">
                 <div className="col-span-8 space-y-8">
                     <div className="flex h-[400px] gap-4">
-                        <div className="w-2/3">
-                             <img src={primaryImage || "https://via.placeholder.com/800x600/F0F0F0/BDBDBD?text=Primary+Image"} alt={service.title} className="w-full h-full object-cover rounded-lg shadow-md" />
+                        <div className="w-2/3 bg-gray-100 rounded-lg">
+                            {primaryImage ? (
+                                <img src={primaryImage} alt={service.title} className="w-full h-full object-cover rounded-lg shadow-md" />
+                            ) : (
+                                <div className="flex items-center justify-center h-full text-gray-400">No Primary Image</div>
+                            )}
                         </div>
                         <div className="w-1/3 flex flex-col gap-4">
-                            <img src={secondaryImages[0]?.file_name || "https://via.placeholder.com/400x300/F0F0F0/BDBDBD?text=Image+2"} alt="Secondary" className="w-full h-1/2 object-cover rounded-lg shadow-md" />
-                            <img src={secondaryImages[1]?.file_name || "https://via.placeholder.com/400x300/F0F0F0/BDBDBD?text=Image+3"} alt="Tertiary" className="w-full h-1/2 object-cover rounded-lg shadow-md" />
+                            <div className="h-1/2 bg-gray-100 rounded-lg">
+                                {secondaryImages[0]?.file_name ? (
+                                    <img src={secondaryImages[0].file_name} alt="Secondary" className="w-full h-full object-cover rounded-lg shadow-md" />
+                                ) : (
+                                    <div className="flex items-center justify-center h-full text-gray-400">No Image</div>
+                                )}
+                            </div>
+                            <div className="h-1/2 bg-gray-100 rounded-lg">
+                                 {secondaryImages[1]?.file_name ? (
+                                    <img src={secondaryImages[1].file_name} alt="Tertiary" className="w-full h-full object-cover rounded-lg shadow-md" />
+                                ) : (
+                                    <div className="flex items-center justify-center h-full text-gray-400">No Image</div>
+                                )}
+                            </div>
                         </div>
                     </div>
                     
@@ -94,7 +111,6 @@ export default function ServiceDetailsPage() {
                     </div>
                     
                     <ProfileCardSection />
-
                 </div>
 
                 <div className="col-span-4">

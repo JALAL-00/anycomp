@@ -14,7 +14,9 @@ import { createAdminIfNotExist } from './services/auth.service';
 const app: Application = express();
 const PORT = process.env.PORT || 5002;
 
-app.use(helmet());
+// CRITICAL FIX: Configure Helmet to allow cross-origin resource loading.
+// This tells browsers that it's okay for the frontend to display images from this server.
+app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 
 const corsOptions = {
   origin: '*',
@@ -24,6 +26,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
+// This serves the images from the /uploads folder. It will now have the correct headers from Helmet.
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 
 app.use('/api/auth', authRouter);
