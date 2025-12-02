@@ -1,104 +1,90 @@
-// src/components/layout/Header.tsx (FULL CORRECTED CODE with Logout)
 'use client';
 
-import React, { useState } from 'react';
-// MUI Icons and Components
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import PersonIcon from '@mui/icons-material/Person';
-import { IconButton, Menu, MenuItem, Typography } from '@mui/material';
-// FIX: Changed to NAMED IMPORT { useAuth }
-import { useAuth } from '@/context/AuthContext'; 
-import { useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
+import React, { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
+import { IconButton, Menu, MenuItem, Typography, Box, Badge } from '@mui/material';
+import MailOutlineIcon from '@mui/icons-material/MailOutline';
+import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import LogoutIcon from '@mui/icons-material/Logout';
 import SettingsIcon from '@mui/icons-material/Settings';
+import { useAuth } from '@/context/AuthContext';
 
-
-/**
- * Renders the fixed header with page title and user actions, including Logout.
- */
 const Header: React.FC = () => {
-    const { logout } = useAuth(); // <-- Get logout function
-    const { user } = useSelector((state: RootState) => state.auth);
-    
-    // MUI Menu state
+    const { logout } = useAuth();
+    const pathname = usePathname();
+    const [breadcrumb, setBreadcrumb] = useState('Dashboard');
+
+    // Effect to update breadcrumb based on the current URL
+    useEffect(() => {
+        if (pathname.startsWith('/admin/specialists/create')) {
+            setBreadcrumb('Dashboard / Create');
+        } else if (pathname.startsWith('/admin/services')) {
+            setBreadcrumb('Dashboard / Edit Services');
+        } else if (pathname.startsWith('/admin/specialists')) {
+            setBreadcrumb('Dashboard / Services');
+        } else {
+            setBreadcrumb('Dashboard');
+        }
+    }, [pathname]);
+
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
     };
-
     const handleClose = () => {
         setAnchorEl(null);
     };
-
     const handleLogout = () => {
-        logout(); // Call the logout function from AuthContext
+        logout();
         handleClose();
     };
-    
-    // Mock current location from Figma
-    const location = 'Dashboard / Services';
 
     return (
-        <header className="flex-shrink-0 flex items-center justify-between h-16 px-8 border-b border-zinc-200 bg-white shadow-sm">
+        <header className="flex-shrink-0 flex items-center justify-between h-20 px-8 border-b border-zinc-200 bg-white">
             
-            {/* Left Section: Breadcrumbs / Current Location */}
-            <div className='flex items-center space-x-1 text-sm text-zinc-500'>
-                <span className='font-medium text-text-primary'>{location}</span>
-            </div>
+            <Box>
+                <Typography sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
+                    {breadcrumb}
+                </Typography>
+            </Box>
 
-            {/* Right Section: Icons and User Menu */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
                 
-                {/* User Name */}
-                <div className="flex items-center space-x-2">
-                    <span className="text-sm font-medium">{user?.email.split('@')[0] || 'User'}</span>
-                </div>
-                
-                {/* Notifications Icon */}
-                <button className="relative p-1 rounded-full text-zinc-500 hover:bg-zinc-100 transition-colors">
-                    <NotificationsIcon sx={{ fontSize: 24 }} />
-                    <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-accent-red"></span>
-                </button>
-
-                {/* User Menu Icon */}
-                <IconButton 
-                    onClick={handleClick}
-                    size="small"
-                    aria-controls={open ? 'account-menu' : undefined}
-                    aria-haspopup="true"
-                    aria-expanded={open ? 'true' : undefined}
-                    className="text-primary-dark"
-                >
-                    <PersonIcon className="w-6 h-6" />
+                <IconButton sx={{ color: 'text.secondary' }}>
+                    <MailOutlineIcon />
                 </IconButton>
                 
-                {/* User Menu */}
+                <IconButton sx={{ color: 'text.secondary' }}>
+                    <Badge color="error" variant="dot">
+                        <NotificationsNoneIcon />
+                    </Badge>
+                </IconButton>
+                
+                <IconButton onClick={handleClick} size="small">
+                    <PersonOutlineIcon />
+                </IconButton>
+                
                 <Menu
                     anchorEl={anchorEl}
                     id="account-menu"
                     open={open}
                     onClose={handleClose}
-                    onClick={handleClose}
                     transformOrigin={{ horizontal: 'right', vertical: 'top' }}
                     anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
                     PaperProps={{
-                        elevation: 0,
+                        elevation: 3,
                         sx: {
                             overflow: 'visible',
-                            filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                            borderRadius: '12px',
                             mt: 1.5,
+                            minWidth: 180,
                             '& .MuiAvatar-root': { width: 32, height: 32, ml: -0.5, mr: 1, },
                             '&::before': {
-                                content: '""',
-                                display: 'block',
-                                position: 'absolute',
-                                top: 0,
-                                right: 14,
-                                width: 10,
-                                height: 10,
+                                content: '""', display: 'block', position: 'absolute',
+                                top: 0, right: 14, width: 10, height: 10,
                                 bgcolor: 'background.paper',
                                 transform: 'translateY(-50%) rotate(45deg)',
                                 zIndex: 0,
@@ -107,10 +93,10 @@ const Header: React.FC = () => {
                     }}
                 >
                     <MenuItem onClick={handleClose}>
-                        <SettingsIcon fontSize="small" sx={{ mr: 1 }} /> Account Settings
+                        <SettingsIcon fontSize="small" sx={{ mr: 1.5 }} /> Account Settings
                     </MenuItem>
                     <MenuItem onClick={handleLogout}>
-                        <LogoutIcon fontSize="small" sx={{ mr: 1 }} /> Logout
+                        <LogoutIcon fontSize="small" sx={{ mr: 1.5 }} /> Logout
                     </MenuItem>
                 </Menu>
             </div>
