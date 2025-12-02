@@ -10,9 +10,7 @@ const ProfileCardSection: React.FC = () => {
             <div className="flex items-start space-x-4 bg-zinc-50 p-4 rounded-lg border border-zinc-100">
                 <div className="relative">
                     <Avatar 
-                        src="https://via.placeholder.com/150" 
-                        alt="Grace Lam"
-                        sx={{ width: 64, height: 64 }}
+                        sx={{ width: 64, height: 64, bgcolor: 'grey.300' }}
                     />
                 </div>
                 

@@ -16,6 +16,12 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
         setIsClient(true);
     }, []);
 
+    useEffect(() => {
+        if (isClient && !isAuthenticated && pathname !== '/login') {
+            router.push('/login');
+        }
+    }, [isClient, isAuthenticated, pathname, router]);
+
     if (!isClient) {
         return (
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
@@ -24,16 +30,13 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
         );
     }
     
-    const isPublicPath = pathname === '/login';
-
-    if (!isAuthenticated && !isPublicPath) {
-        router.push('/login');
+    if (!isAuthenticated && pathname !== '/login') {
         return (
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
                 <CircularProgress />
             </Box>
         );
     }
-
+    
     return <>{children}</>;
 }

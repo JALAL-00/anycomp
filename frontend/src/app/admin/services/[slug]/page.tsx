@@ -7,8 +7,11 @@ import { Specialist as SpecialistType } from '@/store/specialistSlice';
 import EditServiceDrawer from '@/components/specialists/EditServiceDrawer';
 import AdditionalOfferingsSection from '@/components/specialists/AdditionalOfferingsSection';
 import ProfileCardSection from '@/components/specialists/ProfileCardSection';
-import ConfirmationModal from '@/components/ui/ConfirmationModal'; // Corrected Import Path
+import ConfirmationModal from '@/components/ui/ConfirmationModal';
 import api from '@/lib/api';
+
+// Helper to get the base URL of the backend API
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '');
 
 const EditableImage = ({ src, alt, onImageUpload }: { src?: string; alt: string; onImageUpload: (file: File) => void; }) => {
     const inputRef = useRef<HTMLInputElement>(null);
@@ -31,6 +34,9 @@ const EditableImage = ({ src, alt, onImageUpload }: { src?: string; alt: string;
         }
     };
     
+    // Construct the full URL for the image
+    const imageUrl = src ? (src.startsWith('blob:') ? src : `${API_BASE_URL}${src}`) : undefined;
+
     return (
         <Box 
             onClick={handleContainerClick}
@@ -39,17 +45,20 @@ const EditableImage = ({ src, alt, onImageUpload }: { src?: string; alt: string;
                 width: '100%', 
                 height: '100%',
                 cursor: 'pointer',
-                bgcolor: 'grey.100',
-                borderRadius: '8px',
+                bgcolor: '#f1f5f9', // Use a light gray background for empty state
+                borderRadius: '12px',
                 overflow: 'hidden',
-                '&:hover .overlay': { opacity: 1 }
+                '&:hover .overlay': { opacity: 1 },
+                border: '2px dashed #e2e8f0' // Dashed border for empty state
             }}
         >
             <input type="file" ref={inputRef} onChange={handleFileChange} hidden accept="image/*" />
-            {src ? (
-                 <img src={src} alt={alt} className="w-full h-full object-cover" />
+            {imageUrl ? (
+                 <img src={imageUrl} alt={alt} className="w-full h-full object-cover" />
             ) : (
-                 <div className="flex items-center justify-center h-full text-gray-400 text-sm">Click to upload</div>
+                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'text.secondary', p: 2, textAlign: 'center' }}>
+                    <Typography variant="body2">Click to upload</Typography>
+                 </Box>
             )}
             <div className="overlay absolute inset-0 bg-black/50 flex items-center justify-center text-white text-sm font-semibold opacity-0 transition-opacity pointer-events-none">
                 {isUploading ? <CircularProgress color="inherit" size={24}/> : 'Change Image'}
@@ -114,10 +123,8 @@ export default function ServiceDetailsPage() {
         try {
             await api.patch(`/specialists/${service.id}/publish`);
             setPublishModalOpen(false);
-            // Navigate to the public specialists page on success
             router.push('/specialists');
         } catch (err) {
-            console.error("Publish failed", err);
             alert("Failed to publish the service. Please try again.");
             setPublishModalOpen(false);
         }
@@ -138,30 +145,13 @@ export default function ServiceDetailsPage() {
     return (
         <div className="pb-20">
             {isDrawerOpen && <EditServiceDrawer service={service} open={isDrawerOpen} onClose={() => setDrawerOpen(false)} onSaveSuccess={handleEditSuccess} />}
-            <ConfirmationModal 
-                open={isPublishModalOpen}
-                title="Publish changes"
-                message="Do you want to publish these changes? It will appear in the marketplace listing."
-                onConfirm={handlePublish}
-                onCancel={() => setPublishModalOpen(false)}
-            />
+            <ConfirmationModal open={isPublishModalOpen} title="Publish changes" message="Do you want to publish these changes? It will appear in the marketplace listing." onConfirm={handlePublish} onCancel={() => setPublishModalOpen(false)} />
             
             <div className="flex justify-between items-center mb-6">
                 <Typography variant="h4" className="font-bold text-text-primary">{service.title}</Typography>
                 <div className="flex space-x-3">
                     <Button variant="outlined" sx={{ borderRadius: '6px', borderColor: '#00244F', color: '#00244F' }} onClick={() => setDrawerOpen(true)}>Edit</Button>
-                    <Button 
-                        variant="contained" 
-                        onClick={() => setPublishModalOpen(true)}
-                        disabled={!service.is_draft}
-                        sx={{ 
-                            borderRadius: '6px', 
-                            bgcolor: service.is_draft ? '#00244F' : '#4CAF50',
-                            '&:hover': {
-                                bgcolor: service.is_draft ? '#001a38' : '#388E3C',
-                            }
-                        }}
-                    >
+                    <Button variant="contained" onClick={() => setPublishModalOpen(true)} disabled={!service.is_draft} sx={{ borderRadius: '6px', bgcolor: service.is_draft ? '#00244F' : '#4CAF50', '&:hover': { bgcolor: service.is_draft ? '#001a38' : '#388E3C', } }}>
                         {service.is_draft ? 'Publish' : 'Published'}
                     </Button>
                 </div>
@@ -170,10 +160,16 @@ export default function ServiceDetailsPage() {
             <div className="grid grid-cols-12 gap-8">
                 <div className="col-span-8 space-y-8">
                     <div className="flex h-[400px] gap-4">
-                        <div className="w-2/3"><EditableImage src={mediaSlot1?.file_name} alt="Primary Image (Slot 1)" onImageUpload={(file) => handleImageUpload(file, 1)} /></div>
+                        <div className="w-2/3">
+                            <EditableImage src={mediaSlot1?.file_name} alt="Primary Image" onImageUpload={(file) => handleImageUpload(file, 1)} />
+                        </div>
                         <div className="w-1/3 flex flex-col gap-4">
-                            <div className="h-1/2"><EditableImage src={mediaSlot2?.file_name} alt="Secondary Image (Slot 2)" onImageUpload={(file) => handleImageUpload(file, 2)} /></div>
-                            <div className="h-1/2"><EditableImage src={mediaSlot3?.file_name} alt="Tertiary Image (Slot 3)" onImageUpload={(file) => handleImageUpload(file, 3)} /></div>
+                            <div className="h-1/2">
+                               <EditableImage src={mediaSlot2?.file_name} alt="Secondary Image" onImageUpload={(file) => handleImageUpload(file, 2)} />
+                            </div>
+                            <div className="h-1/2">
+                                <EditableImage src={mediaSlot3?.file_name} alt="Tertiary Image" onImageUpload={(file) => handleImageUpload(file, 3)} />
+                            </div>
                         </div>
                     </div>
                     
@@ -185,7 +181,9 @@ export default function ServiceDetailsPage() {
                      <Paper variant="outlined" className="p-6 sticky top-6">
                         <Typography variant="h6" className="font-semibold mb-1">Professional Fee</Typography>
                         <Typography variant="body2" className="text-zinc-500 mb-4">Set a rate for your service</Typography>
-                        <Typography variant="h3" className="font-bold my-4 text-center border-b pb-4">RM {basePriceNum.toLocaleString('en-US', { minimumFractionDigits: 2 })}</Typography>
+                        <Typography variant="h3" className="font-bold my-4 text-center border-b pb-4">
+                            RM {basePriceNum.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                        </Typography>
                         <div className="space-y-2 mt-4 text-sm">
                            <div className='flex justify-between'><span className="text-zinc-600">Base price</span><span className="font-medium">RM {basePriceNum.toFixed(2)}</span></div>
                            <div className='flex justify-between'><span className="text-zinc-600">Service processing fee</span><span className="font-medium">RM {platformFeeNum.toFixed(2)}</span></div>
