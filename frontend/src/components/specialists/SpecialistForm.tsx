@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
     TextField, Typography, Button, CircularProgress, Select, 
     MenuItem, FormControl, InputLabel, IconButton
@@ -14,23 +14,23 @@ import AdditionalOfferingsSection from './AdditionalOfferingsSection';
 import ProfileCardSection from './ProfileCardSection';
 import api from '@/lib/api';
 
-interface MediaPayload { file_name: string; mime_type: string; file_size: number; display_order: number; }
 interface FormState {
-    title: string; description: string; base_price: number; duration_days: number;
-    is_draft?: boolean;
-    category: string; 
+    title: string;
+    description: string;
+    base_price: number;
+    duration_days: number;
+    category: string;
     completion_time_label: string;
 }
 
 const initialFormState: FormState = { 
-    title: '', description: '', base_price: 1800, duration_days: 7, is_draft: true,
-    category: 'Incorporation', completion_time_label: '7 Days'
+    title: '',
+    description: '',
+    base_price: 1800,
+    duration_days: 7,
+    category: 'Incorporation',
+    completion_time_label: '7 Days'
 };
-
-interface SpecialistFormProps {
-    mode: 'create' | 'edit';
-    specialistId?: string; 
-}
 
 interface MediaSlot {
     file: File | null;
@@ -38,30 +38,21 @@ interface MediaSlot {
     id: number;
 }
 
-const SpecialistForm: React.FC<SpecialistFormProps> = ({ mode, specialistId }) => {
+const SpecialistForm: React.FC = () => {
     const router = useRouter(); 
     const [formData, setFormData] = useState<FormState>(initialFormState);
     const [loading, setLoading] = useState(false);
     const [submissionError, setSubmissionError] = useState<string | null>(null);
-    const [showPublishModal, setShowPublishModal] = useState(false);
-
     const [mediaSlots, setMediaSlots] = useState<MediaSlot[]>([
         { id: 1, file: null, preview: null },
         { id: 2, file: null, preview: null },
         { id: 3, file: null, preview: null },
     ]);
 
-    const SERVICE_FEE_RATE = 0.3; 
+    const SERVICE_FEE_RATE = 0.20; 
     const serviceFee = formData.base_price * SERVICE_FEE_RATE;
     const totalFee = formData.base_price + serviceFee;
-    const yourReturns = totalFee * (1 - SERVICE_FEE_RATE);
-
-    useEffect(() => {
-        if (mode === 'edit' && specialistId && formData.title === '') { 
-            // This component is now only for CREATE mode, so this block is not strictly necessary but kept for safety.
-            router.push('/admin/specialists'); // Redirect if accessed incorrectly
-        }
-    }, [mode, specialistId, router]);
+    const yourReturns = formData.base_price;
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -70,16 +61,14 @@ const SpecialistForm: React.FC<SpecialistFormProps> = ({ mode, specialistId }) =
     };
 
     const handleSelectChange = (e: any) => {
-         const { name, value } = e.target;
-         setFormData(prev => ({ ...prev, [name]: value }));
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
     }
 
     const handleFileChange = (slotId: number, e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            if (file.size > 4 * 1024 * 1024) {
-                 alert('File max 4MB'); return;
-            }
+            if (file.size > 4 * 1024 * 1024) { alert('File max 4MB'); return; }
             const preview = URL.createObjectURL(file);
             setMediaSlots(prev => prev.map(slot => slot.id === slotId ? { ...slot, file, preview } : slot));
         }
@@ -91,19 +80,23 @@ const SpecialistForm: React.FC<SpecialistFormProps> = ({ mode, specialistId }) =
 
     const handleFormSubmit = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
-        setLoading(true);
         setSubmissionError(null);
+
+        if (!formData.title.trim() || !formData.description.trim() || formData.base_price <= 0 || formData.duration_days <= 0) {
+            setSubmissionError("Title, Description, and a valid Price/Duration are required.");
+            return;
+        }
+
+        setLoading(true);
 
         const submissionPayload = new FormData();
         submissionPayload.append('title', formData.title);
         submissionPayload.append('description', formData.description);
         submissionPayload.append('base_price', String(formData.base_price));
         submissionPayload.append('duration_days', String(formData.duration_days));
-        submissionPayload.append('platform_fee', String(serviceFee));
-        submissionPayload.append('final_price', String(totalFee));
 
         mediaSlots.forEach(slot => {
-            if(slot.file) {
+            if (slot.file) {
                 submissionPayload.append('images', slot.file);
             }
         });
@@ -113,9 +106,8 @@ const SpecialistForm: React.FC<SpecialistFormProps> = ({ mode, specialistId }) =
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
             router.push('/admin/specialists');
-            
         } catch (error: any) {
-            setSubmissionError(error?.message || 'An error occurred during creation.');
+            setSubmissionError(error || 'An error occurred during creation.');
         } finally {
             setLoading(false);
         }
@@ -141,7 +133,7 @@ const SpecialistForm: React.FC<SpecialistFormProps> = ({ mode, specialistId }) =
             
             <form className="flex space-x-8" onSubmit={handleFormSubmit}>
                 <div className="flex-1 space-y-10 max-w-4xl">
-                    {submissionError && <Typography color="error" className='p-3 border border-red-200 bg-red-50 rounded'>{submissionError}</Typography>}
+                    {submissionError && <Typography color="error" className='p-3 border border-red-200 bg-red-50 rounded-md text-sm'>{submissionError}</Typography>}
 
                     <div className='space-y-4'>
                         <Typography className='uppercase text-xs font-bold text-zinc-400 tracking-wide'>Service Details</Typography>
@@ -189,7 +181,6 @@ const SpecialistForm: React.FC<SpecialistFormProps> = ({ mode, specialistId }) =
                                 <div key={slot.id} className="flex-1">
                                     <div className="border border-dashed border-zinc-300 rounded-lg h-40 bg-zinc-50 relative flex flex-col items-center justify-center hover:bg-zinc-100 transition-colors overflow-hidden group">
                                         <input type="file" accept="image/*" onChange={(e) => handleFileChange(slot.id, e)} className="absolute w-full h-full opacity-0 cursor-pointer z-10" />
-                                        
                                         {slot.preview ? (
                                             <>
                                                 <img src={slot.preview} alt={`Slot ${slot.id}`} className="w-full h-full object-cover" />

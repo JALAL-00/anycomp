@@ -64,14 +64,14 @@ const EditServiceDrawer: React.FC<EditServiceDrawerProps> = ({ open, onClose, se
     }, [open, service]);
 
     return (
-        <Drawer anchor="right" open={open} onClose={onClose} PaperProps={{ sx: { width: '40vw', maxWidth: '700px', minWidth: '500px' } }}>
+        <Drawer anchor="right" open={open} onClose={onClose} PaperProps={{ sx: { width: '30vw', maxWidth: '700px', minWidth: '500px' } }}>
             <Box sx={{ p: 4, display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <div className="flex justify-between items-center mb-6">
                     <Typography variant="h5" className="font-bold">Edit Service</Typography>
                     <IconButton onClick={onClose}><CloseIcon /></IconButton>
                 </div>
                 
-                <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto space-y-4 pr-2">
+                <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto space-y-5 pr-2">
                     {error && <Typography color="error" className="bg-red-50 p-3 rounded-md text-sm">{error}</Typography>}
                     
                     <TextField name="title" label="Title" value={formData.title} onChange={handleInputChange} fullWidth required />
