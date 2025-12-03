@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-export type UserRole = 'admin'; 
+export type UserRole = 'admin';
 
 interface AuthState {
     token: string | null;
@@ -38,22 +38,44 @@ const authSlice = createSlice({
             state.isAuthenticated = true;
             state.loading = false;
             state.error = null;
-            localStorage.setItem('admin_token', action.payload.token || ''); 
+            localStorage.setItem('admin_token', action.payload.token || '');
+            if (action.payload.user) {
+                localStorage.setItem('admin_user', JSON.stringify(action.payload.user));
+            }
         },
         logout(state) {
             state.token = null;
             state.user = null;
             state.isAuthenticated = false;
             localStorage.removeItem('admin_token');
+            localStorage.removeItem('admin_user');
+        },
+        initializeAuth(state) {
+            if (typeof window !== 'undefined') {
+                const token = localStorage.getItem('admin_token');
+                const userStr = localStorage.getItem('admin_user');
+                if (token && userStr) {
+                    try {
+                        const user = JSON.parse(userStr);
+                        state.token = token;
+                        state.user = user;
+                        state.isAuthenticated = true;
+                    } catch (error) {
+                        localStorage.removeItem('admin_token');
+                        localStorage.removeItem('admin_user');
+                    }
+                }
+            }
         },
     },
 });
 
-export const { 
-    setAuthLoading, 
-    setAuthError, 
-    setCredentials, 
-    logout 
+export const {
+    setAuthLoading,
+    setAuthError,
+    setCredentials,
+    logout,
+    initializeAuth
 } = authSlice.actions;
 
 export default authSlice.reducer;

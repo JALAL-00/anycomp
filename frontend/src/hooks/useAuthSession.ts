@@ -11,16 +11,19 @@ export function useAuthSession() {
 
     useEffect(() => {
         const token = localStorage.getItem('admin_token');
+        const userStr = localStorage.getItem('admin_user');
 
-        if (token) {
-            dispatch(setCredentials({
-                token,
-                user: {
-                    id: 'local_user',
-                    email: 'admin@stcomp.com',
-                    role: 'admin'
-                }
-            }));
+        if (token && userStr) {
+            try {
+                const user = JSON.parse(userStr);
+                dispatch(setCredentials({
+                    token,
+                    user
+                }));
+            } catch (error) {
+                console.error('Failed to parse user data from localStorage:', error);
+                dispatch(logout());
+            }
         } else {
             dispatch(logout());
         }
