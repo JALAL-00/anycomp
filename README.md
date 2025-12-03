@@ -61,7 +61,7 @@ The project features a **PostgreSQL** backend managed by a robust **Next.js/Reac
     DB_DATABASE=anycomp_db
 
     # Security
-    JWT_SECRET=a-very-secure-secret-for-the-assessment
+    JWT_SECRET=9f2b7cda4a8348d3a2f58f49ad5bfae2d6c4a1e9d8b7c6f5a4b3c2d1e0f9a8b7
     ```
 4.  Run all database migrations to build the schema:
     ```bash
