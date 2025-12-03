@@ -2,29 +2,31 @@
 
 This is a complete, production-grade implementation of the **Anycomp Specialist Registration and Management System**, developed as a full-stack proficiency assessment.
 
-The project features a **PostgreSQL** backend managed by a robust **Next.js/React** frontend with **JWT/RBAC** for secure administrative access.
+The project features a **PostgreSQL** backend managed by a robust **Next.js/React** frontend with **JWT** for secure administrative access, designed to be a pixel-perfect match of the provided Figma designs.
 
 ## 🚀 Key Features Implemented
 
 *   **Full-Stack Architecture:** Next.js (Frontend) + Node.js/Express/TypeORM (Backend).
-*   **Database:** PostgreSQL with transactional migrations (`users`, `specialists`, `media`, `service_offerings`, `platform_fee`).
-*   **Admin Dashboard (Page 1):** Full List View, Filtering (All/Drafts/Published), Search, and Pagination.
-*   **Specialist Management (Pages 2 & 3):** Dedicated UI for seamless creation and editing of specialist records using "Smart Mode Detection".
-*   **Media Management:** Multi-slot image upload support (3 slots) mapped to specific display orders.
-*   **Dynamic Forms:** "Additional Offerings" implementation with chip-based input logic.
-*   **Publishing Flow:** Modal-confirmed publishing workflow (`PATCH /publish`).
-*   **Security (Bonus Requirement):** Implemented JWT Authentication and Role-Based Access Control (`AuthGuard`) to enforce Admin-Only access.
+*   **Database:** PostgreSQL with transactional migrations to create all required tables.
+*   **Admin Dashboard:** A complete CRUD interface for "Specialist" services, including a filterable list view (All/Drafts/Published), live search, and custom pagination.
+*   **Service Detail Page:** A dynamic page to view full service details, including the image gallery, pricing, and description.
+*   **Dynamic Image Management:** Users can instantly update any of the three service images directly from the detail page via a dedicated API endpoint.
+*   **Slide-In Edit Drawer:** A non-disruptive, right-side drawer for editing core service details (Title, Description, Price, etc.), matching the Figma UI.
+*   **Create Service Page:** A dedicated, feature-rich page for creating new services with a layout that mirrors the polished detail page.
+*   **Publishing Workflow:** A complete, modal-confirmed flow that transitions a service from a draft state to public visibility and redirects the user to the public marketplace.
+*   **Public Marketplace:** A public-facing page (`/specialists`) that displays all published services with their cover images and prices.
+*   **Security (Bonus):** Implemented JWT Authentication and a client-side `AuthGuard` to enforce Admin-Only access to all management pages.
 
 ---
 
 ## 💻 Tech Stack Summary
 
-| Component | Technology | Notes |
-| :--- | :--- | :--- |
-| **Frontend** | Next.js 16 (App Router), TypeScript, Tailwind CSS, Material UI, Redux Toolkit | Client-side application with state management and pixel-perfect Figma adherence. |
-| **Backend** | Node.js, Express, TypeScript, TypeORM | RESTful API architecture with error handling, strict validation, and transaction management. |
-| **Database** | PostgreSQL | Relational database (strictly NOT MongoDB). |
-| **Auth** | JWT, BCrypt, RBAC | Admin-only access enforcement on critical endpoints. |
+| Component  | Technology                                                              | Notes                                                               |
+| :--------- | :---------------------------------------------------------------------- | :------------------------------------------------------------------ |
+| **Frontend** | Next.js (App Router), TypeScript, Tailwind CSS, Material UI, Redux Toolkit | Client-side application with state management and component architecture. |
+| **Backend**  | Node.js, Express, TypeScript, TypeORM                                   | RESTful API with middleware, services, and error handling.          |
+| **Database** | PostgreSQL                                                              | Relational database (strictly NOT MongoDB).                         |
+| **Auth**     | JWT, BCrypt                                                             | Admin-only access enforcement on critical API endpoints.            |
 
 ---
 
@@ -33,27 +35,25 @@ The project features a **PostgreSQL** backend managed by a robust **Next.js/Reac
 ### A. Prerequisites
 
 1.  **Node.js:** v18 or higher.
-2.  **PostgreSQL:** Instance running locally on default port `5432`.
-3.  **Database:** You **must** create a database named `anycomp_db` before running the backend.
+2.  **PostgreSQL:** An active instance running locally (Default port `5432`).
+3.  **Database Creation:** You **must** create an empty database named `anycomp_db` before running the backend.
 
-### B. Backend Setup (Port 5002)
+### B. Backend Setup (`/backend`)
 
 1.  Navigate to the `backend` directory:
     ```bash
     cd backend
     ```
-
 2.  Install dependencies:
     ```bash
     npm install
     ```
-
-3.  Create a `.env` file in the `backend` folder with the following content:
+3.  Create a `.env` file in the `backend` folder and add the following, replacing `your_password_here` with your PostgreSQL password:
     ```env
     PORT=5002
     NODE_ENV=development
 
-    # Database Configuration (Update password if needed)
+    # Database Configuration
     DB_HOST=localhost
     DB_PORT=5432
     DB_USERNAME=postgres
@@ -61,55 +61,58 @@ The project features a **PostgreSQL** backend managed by a robust **Next.js/Reac
     DB_DATABASE=anycomp_db
 
     # Security
-    JWT_SECRET=super_secure_assessment_key_2024
+    JWT_SECRET=a-very-secure-secret-for-the-assessment
     ```
-
-4.  Run Migrations (Create Tables) and Seed Admin:
+4.  Run all database migrations to build the schema:
     ```bash
     npm run migration:run
     ```
-
 5.  Start the backend server:
     ```bash
     npm run dev
     ```
-    *(Console should show: "Server running on port 5002")*
+    *(The API will be running at `http://localhost:5002`)*
 
-### C. Frontend Setup (Port 3000)
+### C. Frontend Setup (`/frontend`)
 
 1.  Open a new terminal and navigate to the `frontend` directory:
     ```bash
     cd frontend
     ```
-
 2.  Install dependencies:
     ```bash
     npm install
     ```
-
-3.  Create a `.env.local` file in the `frontend` folder:
-    ```env
-    NEXT_PUBLIC_API_URL=http://localhost:5002/api
-    ```
-
-4.  Start the frontend application:
+3.  Start the frontend server (the `.env.local` file is already included and configured):
     ```bash
     npm run dev
     ```
+    *(The application will be available at `http://localhost:3000`)*
+
+---
+
+## 🔐 Login Credentials
+
+An initial admin user is automatically created by the backend on the first run.
+
+*   **URL:** `http://localhost:3000/login`
+*   **Email:** `admin@stcomp.com`
+*   **Password:** `AdminPassword123`
 
 ---
 
 ## 🔐 Final Verification Flow
 
-To verify the assessment requirements:
-
-1.  **Login:** Open `http://localhost:3000/login`
+1.  **Login:** Open `http://localhost:3000/login` and sign in with the default admin credentials:
     *   **Email:** `admin@stcomp.com`
     *   **Password:** `AdminPassword123`
-2.  **Dashboard (Page 1):** You will be redirected to the Specialists list.
-3.  **Create (Page 2):** Click **CREATE**. Fill in *Title, Description, Price*, and upload mock images.
-4.  **Edit & Publish (Page 3):** Click **Create**. The page will reload in "Edit Mode". Click **Publish**, confirm the Modal, and verify the status change.
-5.  **List Check:** Go back to the Dashboard. Use the **Published** filter tab to find your new record.
+2.  **Dashboard:** You will be redirected to the **Specialists List** (`/admin/specialists`).
+3.  **Create Service:** Click the **CREATE** button. Fill out the form, including Title, Description, Price, and upload at least one image. Click **Save & Create**.
+4.  **Verify Creation:** You will be redirected back to the Specialists List. Your new service should appear in the table.
+5.  **View Details:** Click on the row of the service you just created. You will be navigated to the **Service Detail Page** (e.g., `/admin/services/your-service-slug`). Verify that the uploaded images and all data are displayed correctly.
+6.  **Edit Service:** On the detail page, click the **EDIT** button. A drawer will slide in from the right. Change the price or description and click **Confirm**. You will be returned to the detail page, which should now show the updated information.
+7.  **Publish Service:** On the detail page, click the **PUBLISH** button. A confirmation modal will appear. Click **Save changes**.
+8.  **Verify Publication:** You will be automatically redirected to the **Public Marketplace** (`/specialists`). Verify that your newly published service is now visible on this page with its cover image.
 
 ---
 
