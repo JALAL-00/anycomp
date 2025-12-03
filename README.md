@@ -1,32 +1,6 @@
-# Anycomp - Fullstack Project
+# Anycomp : Full-Stack Project
 
-This is a complete, production-grade implementation of the **Anycomp Specialist Registration and Management System**, developed as a full-stack proficiency assessment.
-
-The project features a **PostgreSQL** backend managed by a robust **Next.js/React** frontend with **JWT** for secure administrative access, designed to be a pixel-perfect match of the provided Figma designs.
-
-## Key Features Implemented
-
-*   **Full-Stack Architecture:** Next.js (Frontend) + Node.js/Express/TypeORM (Backend).
-*   **Database:** PostgreSQL with transactional migrations to create all required tables.
-*   **Admin Dashboard:** A complete CRUD interface for "Specialist" services, including a filterable list view (All/Drafts/Published), live search, and custom pagination.
-*   **Service Detail Page:** A dynamic page to view full service details, including the image gallery, pricing, and description.
-*   **Dynamic Image Management:** Users can instantly update any of the three service images directly from the detail page via a dedicated API endpoint.
-*   **Slide-In Edit Drawer:** A non-disruptive, right-side drawer for editing core service details (Title, Description, Price, etc.), matching the Figma UI.
-*   **Create Service Page:** A dedicated, feature-rich page for creating new services with a layout that mirrors the polished detail page.
-*   **Publishing Workflow:** A complete, modal-confirmed flow that transitions a service from a draft state to public visibility and redirects the user to the public marketplace.
-*   **Public Marketplace:** A public-facing page (`/specialists`) that displays all published services with their cover images and prices.
-*   **Security (Bonus):** Implemented JWT Authentication and a client-side `AuthGuard` to enforce Admin-Only access to all management pages.
-
----
-
-## Tech Stack Summary
-
-| Component  | Technology                                                              | Notes                                                               |
-| :--------- | :---------------------------------------------------------------------- | :------------------------------------------------------------------ |
-| **Frontend** | Next.js (App Router), TypeScript, Tailwind CSS, Material UI, Redux Toolkit | Client-side application with state management and component architecture. |
-| **Backend**  | Node.js, Express, TypeScript, TypeORM                                   | RESTful API with middleware, services, and error handling.          |
-| **Database** | PostgreSQL                                                              | Relational database (strictly NOT MongoDB).                         |
-| **Auth**     | JWT, BCrypt                                                             | Admin-only access enforcement on critical API endpoints.            |
+This is a complete, production-grade implementation of the **Anycomp Specialist Registration and Management System**, developed as a full-stack proficiency assessment.          |
 
 ---
 
@@ -140,3 +114,30 @@ To view the public page, navigate to `http://localhost:3000/specialists` after p
 ![Image](https://github.com/user-attachments/assets/e84eda55-c294-4ab4-acd3-a88ca3459eae)
 ---
 ![Image](https://github.com/user-attachments/assets/6469fba6-5545-4069-bdd7-13dab18310d5)
+
+---
+The project features a **PostgreSQL** backend managed by a robust **Next.js/React** frontend with **JWT** for secure administrative access, designed to be a pixel-perfect match of the provided Figma designs.
+
+## Key Features Implemented
+
+*   **Full-Stack Architecture:** Next.js (Frontend) + Node.js/Express/TypeORM (Backend).
+*   **Database:** PostgreSQL with transactional migrations to create all required tables.
+*   **Admin Dashboard:** A complete CRUD interface for "Specialist" services, including a filterable list view (All/Drafts/Published), live search, and custom pagination.
+*   **Service Detail Page:** A dynamic page to view full service details, including the image gallery, pricing, and description.
+*   **Dynamic Image Management:** Users can instantly update any of the three service images directly from the detail page via a dedicated API endpoint.
+*   **Slide-In Edit Drawer:** A non-disruptive, right-side drawer for editing core service details (Title, Description, Price, etc.), matching the Figma UI.
+*   **Create Service Page:** A dedicated, feature-rich page for creating new services with a layout that mirrors the polished detail page.
+*   **Publishing Workflow:** A complete, modal-confirmed flow that transitions a service from a draft state to public visibility and redirects the user to the public marketplace.
+*   **Public Marketplace:** A public-facing page (`/specialists`) that displays all published services with their cover images and prices.
+*   **Security (Bonus):** Implemented JWT Authentication and a client-side `AuthGuard` to enforce Admin-Only access to all management pages.
+
+---
+
+## Tech Stack Summary
+
+| Component  | Technology                                                              | Notes                                                               |
+| :--------- | :---------------------------------------------------------------------- | :------------------------------------------------------------------ |
+| **Frontend** | Next.js (App Router), TypeScript, Tailwind CSS, Material UI, Redux Toolkit | Client-side application with state management and component architecture. |
+| **Backend**  | Node.js, Express, TypeScript, TypeORM                                   | RESTful API with middleware, services, and error handling.          |
+| **Database** | PostgreSQL                                                              | Relational database (strictly NOT MongoDB).                         |
+| **Auth**     | JWT, BCrypt                                                             | Admin-only access enforcement on critical API endpoints.  
