@@ -33,4 +33,3 @@ lerna-debug.log*
 
 # File Image
 /backend/public/uploads/*
-!/backend/public/uploads/.gitkeep
