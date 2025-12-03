@@ -31,5 +31,4 @@ lerna-debug.log*
 # Antigravity AI
 .gemini
 
-# File Image
-/backend/public/uploads
+
