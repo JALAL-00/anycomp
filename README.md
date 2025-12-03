@@ -61,7 +61,7 @@ The project features a **PostgreSQL** backend managed by a robust **Next.js/Reac
     DB_DATABASE=anycomp_db
 
     # Security
-    JWT_SECRET=a-very-secure-secret-for-the-assessment
+    JWT_SECRET=e4a7b1f3c9d8e2f6a1b5c8d7e6f4a2b9c0d3e8f1a7b6c5d4e3f2a1b0c9d8e7f6
     ```
 4.  Run all database migrations to build the schema:
     ```bash
@@ -83,7 +83,11 @@ The project features a **PostgreSQL** backend managed by a robust **Next.js/Reac
     ```bash
     npm install
     ```
-3.  Start the frontend server (the `.env.local` file is already included and configured):
+3.  Create a `.env.local` file in the `frontend` folder with the following content:
+    ```env
+    NEXT_PUBLIC_API_URL=http://localhost:5002/api
+    ```
+4.  Start the frontend application:
     ```bash
     npm run dev
     ```
@@ -103,40 +107,31 @@ An initial admin user is automatically created by the backend on the first run.
 
 ## Final Verification Flow
 
-1.  **Login:** Open `http://localhost:3000/login` and sign in with the default admin credentials:
-    *   **Email:** `admin@stcomp.com`
-    *   **Password:** `AdminPassword123`
+1.  **Login:** Open `http://localhost:3000/login` and sign in with the default admin credentials.
 2.  **Dashboard:** You will be redirected to the **Specialists List** (`/admin/specialists`).
 3.  **Create Service:** Click the **CREATE** button. Fill out the form, including Title, Description, Price, and upload at least one image. Click **Save & Create**.
 4.  **Verify Creation:** You will be redirected back to the Specialists List. Your new service should appear in the table.
-5.  **View Details:** Click on the row of the service you just created. You will be navigated to the **Service Detail Page** (e.g., `/admin/services/your-service-slug`). Verify that the uploaded images and all data are displayed correctly.
-6.  **Edit Service:** On the detail page, click the **EDIT** button. A drawer will slide in from the right. Change the price or description and click **Confirm**. You will be returned to the detail page, which should now show the updated information.
-7.  **Publish Service:** On the detail page, click the **PUBLISH** button. A confirmation modal will appear. Click **Save changes**.
-8.  **Verify Publication:** You will be automatically redirected to the **Public Marketplace** (`/specialists`). Verify that your newly published service is now visible on this page with its cover image.
+5.  **View & Edit Service:** Click on the row of the service you just created to navigate to the **Service Detail Page**. Click the **EDIT** button. A drawer will slide in from the right. Change the price or description and click **Confirm**. You will be returned to the detail page, which should now show the updated information.
+6.  **Publish Service:** On the detail page, click the **PUBLISH** button. A confirmation modal will appear. Click **Save changes**.
+7.  **Verify Publication:** You will be automatically redirected to the **Public Marketplace** (`/specialists`). Verify that your newly published service is now visible on this page with its cover image.
 
 ---
-Project Screenshoots 
+### Project Screenshots
 ---
-Specialist Dashboard:
+**Specialist Dashboard:**
 ![Image](https://github.com/user-attachments/assets/1afb32fe-6759-4c0c-8246-c72ff9a06f15)
 
-Create New Service:
+**Create New Service:**
 ![Image](https://github.com/user-attachments/assets/cd7bed56-a0df-46c8-a701-6134efc7ec55)
 
-Edit Service: 
+**Service Detail Page & Edit Drawer:**
 ![Image](https://github.com/user-attachments/assets/aa06923e-f587-4ad7-abc9-4b58fc1f8e4e)
 
-Edit Service PopUp:
-![Image](https://github.com/user-attachments/assets/972c0b1b-b515-45e9-a8e5-3bbac2639942)
+**Service Published (Public Marketplace):**
 
-Service Pulished:
----
-For See the Publised Page: `http://localhost:3000/specialists`
----
+To view the public page, navigate to `http://localhost:3000/specialists` after publishing a service.
 ![Image](https://github.com/user-attachments/assets/3b1f7bf5-bfa9-483e-91cb-2dd31adb9f0b)
 
-Log out Specialist:
-![Image](https://github.com/user-attachments/assets/6469fba6-5545-4069-bdd7-13dab18310d5)
-
-login Specialist:
+**Login & Logout:**
 ![Image](https://github.com/user-attachments/assets/e84eda55-c294-4ab4-acd3-a88ca3459eae)
+![Image](https://github.com/user-attachments/assets/6469fba6-5545-4069-bdd7-13dab18310d5)
