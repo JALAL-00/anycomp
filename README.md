@@ -133,9 +133,9 @@ An initial admin user is automatically created by the backend on the first run.
 **Service Published (Public Marketplace):**
 
 To view the public page, navigate to `http://localhost:3000/specialists` after publishing a service.
----
 ![Image](https://github.com/user-attachments/assets/3b1f7bf5-bfa9-483e-91cb-2dd31adb9f0b)
 
+---
 **Login & Logout:**
 ![Image](https://github.com/user-attachments/assets/e84eda55-c294-4ab4-acd3-a88ca3459eae)
 ---
