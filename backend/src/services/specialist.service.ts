@@ -46,7 +46,6 @@ export const createOrUpdateSpecialistWithMedia = async (data: any, files: Expres
         const savedSpecialist = await transactionalEntityManager.save(specialist); 
         if (files && files.length > 0) {
             const mediaEntities = files.map((file, index) => {
-                // THIS IS THE CORRECTED LOGIC
                 const relativePath = `/uploads/${file.filename}`;
                 return transactionalEntityManager.create(Media, { file_name: relativePath, file_size: file.size, mime_type: file.mimetype as any, display_order: index + 1, specialist_id: savedSpecialist.id });
             });
