@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '@/store/store';
-import { usePathname } from 'next/navigation'; // Import usePathname
+import { usePathname } from 'next/navigation'; 
 import { fetchSpecialists } from '@/lib/dataFetcher';
 import SpecialistFilter from '@/components/specialists/SpecialistFilter';
 import SpecialistTable from '@/components/specialists/SpecialistTable';
@@ -11,7 +11,7 @@ import { Typography } from '@mui/material';
 
 export default function SpecialistsPage() {
   const dispatch = useDispatch<AppDispatch>();
-  const pathname = usePathname(); // Get the current URL path
+  const pathname = usePathname(); 
   const { filter, search, page, limit, error } = useSelector((state: RootState) => state.specialists);
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
 
@@ -19,7 +19,7 @@ export default function SpecialistsPage() {
     if (isAuthenticated) {
       dispatch(fetchSpecialists({ filter, search, page, limit }));
     }
-  }, [filter, search, page, limit, dispatch, isAuthenticated, pathname]); // Add pathname here
+  }, [filter, search, page, limit, dispatch, isAuthenticated, pathname]); 
 
   return (
     <div className="space-y-6">

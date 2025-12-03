@@ -1,4 +1,4 @@
-// src/context/AuthContext.tsx (FINAL CORRECTED CODE)
+// src/context/AuthContext.tsx 
 
 import React, { createContext, useContext } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -8,15 +8,13 @@ import {
     logout as reduxLogout, 
     setAuthLoading, 
     setAuthError,
-    UserRole // <-- Import UserRole from slice to keep types synched
+    UserRole 
 } from '@/store/authSlice';
 import api from '@/lib/api';
 import { useRouter } from 'next/navigation';
 
-// Matches the backend structure, uses the role from the slice
 interface LoginResponse {
     token: string;
-    // FIX: Changed role to only reference the correct UserRole type from the slice
     user: { id: string, email: string, role: UserRole }; 
 }
 

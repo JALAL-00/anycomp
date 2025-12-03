@@ -2,7 +2,6 @@
 
 import axios, { AxiosInstance, AxiosError } from 'axios';
 
-// Get backend URL from environment variables
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 if (!API_URL) {
@@ -16,14 +15,11 @@ const api: AxiosInstance = axios.create({
   },
 });
 
-// --- Interceptors for Auth ---
 
 api.interceptors.request.use(
   (config) => {
-    // NOTE: In a real app, this should be managed by a global AuthContext/State
-    // For now, we mock token retrieval from localStorage.
     if (typeof window !== 'undefined') {
-        const token = localStorage.getItem('admin_token'); // Use the stored admin token
+        const token = localStorage.getItem('admin_token'); 
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
@@ -38,7 +34,6 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error: AxiosError) => {
-        // Uniform error structure for easy handling in components
         if (error.response?.data && typeof error.response.data === 'object' && 'message' in error.response.data) {
             return Promise.reject(error.response.data.message);
         }

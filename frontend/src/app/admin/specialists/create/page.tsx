@@ -7,7 +7,6 @@ import AdditionalOfferingsSection from '@/components/specialists/AdditionalOffer
 import ProfileCardSection from '@/components/specialists/ProfileCardSection';
 import api from '@/lib/api';
 
-// Reusable EditableImage Component
 const EditableImage = ({ src, alt, onImageUpload }: { src?: string; alt: string; onImageUpload: (file: File) => void; }) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const [isUploading, setIsUploading] = useState(false);
@@ -26,7 +25,7 @@ export default function CreateServicePage() {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [durationDays, setDurationDays] = useState(7);
-    const [companyType, setCompanyType] = useState('Private Limited - Sdn. Bhd'); // Add state for company type
+    const [companyType, setCompanyType] = useState('Private Limited - Sdn. Bhd'); 
     const [basePrice, setBasePrice] = useState(1800);
     const [images, setImages] = useState<(File | null)[]>([null, null, null]);
     const [previews, setPreviews] = useState<(string | null)[]>([null, null, null]);
@@ -48,8 +47,6 @@ export default function CreateServicePage() {
         submissionData.append('description', description);
         submissionData.append('base_price', String(basePrice));
         submissionData.append('duration_days', String(durationDays));
-        // We can add companyType to submissionData if the backend needs it
-        // submissionData.append('company_type', companyType);
         images.forEach((file) => { if (file) { submissionData.append('images', file); } });
         
         try {

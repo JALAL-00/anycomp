@@ -1,4 +1,4 @@
-// src/app/login/page.tsx (FULL CORRECTED CODE)
+// src/app/login/page.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -13,20 +13,16 @@ export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
   const { loading, error, isAuthenticated } = useSelector((state: RootState) => state.auth);
-
-  // Default values for Admin for fast testing
   const [email, setEmail] = useState('admin@stcomp.com');
   const [password, setPassword] = useState('AdminPassword123');
   const [localError, setLocalError] = useState<string | null>(null);
 
-  // CORRECTED: Moved redirect logic to useEffect to run after render
   useEffect(() => {
     if (isAuthenticated) {
       router.push('/admin/specialists');
     }
   }, [isAuthenticated, router]);
 
-  // If already authenticated, show loading while redirecting
   if (isAuthenticated) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-bg-light">
@@ -56,7 +52,7 @@ export default function LoginPage() {
             ST COMP
           </Typography>
           <Typography variant="h6" className="text-text-primary font-medium">
-            Specialists Login {/* <-- CORRECT PAGE TITLE */}
+            Specialists Login
           </Typography>
         </div>
 
@@ -98,7 +94,7 @@ export default function LoginPage() {
             className="normal-case font-bold"
             sx={{
               height: '50px',
-              bgcolor: '#0A66C2', // primary-blue
+              bgcolor: '#0A66C2', 
               '&:hover': { bgcolor: '#0D47A1' },
               borderRadius: '8px'
             }}

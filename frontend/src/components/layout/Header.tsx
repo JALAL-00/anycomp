@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { useSelector } from 'react-redux'; // Import useSelector
-import { RootState } from '@/store/store'; // Import RootState
+import { useSelector } from 'react-redux'; 
+import { RootState } from '@/store/store'; 
 import { IconButton, Menu, MenuItem, Typography, Box, Badge, Divider } from '@mui/material';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
@@ -15,7 +15,7 @@ import { useAuth } from '@/context/AuthContext';
 const Header: React.FC = () => {
     const { logout } = useAuth();
     const pathname = usePathname();
-    const { user } = useSelector((state: RootState) => state.auth); // Get user data from Redux
+    const { user } = useSelector((state: RootState) => state.auth); 
     const [breadcrumb, setBreadcrumb] = useState('Dashboard');
 
     useEffect(() => {
@@ -51,13 +51,12 @@ const Header: React.FC = () => {
                             overflow: 'visible',
                             borderRadius: '12px',
                             mt: 1.5,
-                            minWidth: 220, // Increased width for email
+                            minWidth: 220, 
                             '& .MuiAvatar-root': { width: 32, height: 32, ml: -0.5, mr: 1, },
                             '&::before': { content: '""', display: 'block', position: 'absolute', top: 0, right: 14, width: 10, height: 10, bgcolor: 'background.paper', transform: 'translateY(-50%) rotate(45deg)', zIndex: 0, },
                         },
                     }}
                 >
-                    {/* Display User Email at the top of the menu */}
                     <Box sx={{ px: 2, py: 1 }}>
                         <Typography variant="body2" sx={{ fontWeight: 'bold' }}>Signed in as</Typography>
                         <Typography variant="caption" color="text.secondary">{user?.email}</Typography>

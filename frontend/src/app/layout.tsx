@@ -1,8 +1,8 @@
-// src/app/layout.tsx (UPDATED)
+// src/app/layout.tsx
 
 import type { Metadata } from "next";
 import "../styles/globals.css";
-import { Providers } from "./providers"; // Will create this component
+import { Providers } from "./providers"; 
 
 // Set required metadata
 export const metadata: Metadata = {

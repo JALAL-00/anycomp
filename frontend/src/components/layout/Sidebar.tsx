@@ -3,8 +3,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useSelector } from 'react-redux'; // Import useSelector
-import { RootState } from '@/store/store'; // Import RootState
+import { useSelector } from 'react-redux'; 
+import { RootState } from '@/store/store'; 
 import PeopleIcon from '@mui/icons-material/PeopleOutlined';
 import ReceiptIcon from '@mui/icons-material/ReceiptOutlined';
 import MailIcon from '@mui/icons-material/MailOutlined';
@@ -32,13 +32,11 @@ const utilityItems = [
 
 const Sidebar: React.FC = () => {
   const pathname = usePathname();
-  const { user } = useSelector((state: RootState) => state.auth); // Get user data from Redux
+  const { user } = useSelector((state: RootState) => state.auth); 
 
   const isServiceDetailPage = pathname.startsWith('/admin/services');
 
-  // Get the name part of the email, or default to 'Admin'
   const userName = user?.email ? user.email.split('@')[0] : 'Admin';
-  // Capitalize the first letter
   const displayName = userName.charAt(0).toUpperCase() + userName.slice(1);
 
   return (

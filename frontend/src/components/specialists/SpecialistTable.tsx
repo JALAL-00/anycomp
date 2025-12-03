@@ -128,7 +128,6 @@ const SpecialistTable: React.FC = () => {
                   <TableCell><StatusChip status={row.verification_status} type='approval' /></TableCell>
                   <TableCell><StatusChip status={!row.is_draft} type='publish' /></TableCell>
                   <TableCell onClick={(e) => e.stopPropagation()}>
-                    {/* CRITICAL CHANGE: Pass the slug to the actions component */}
                     <SpecialistActions specialistId={row.id} slug={row.slug} onDelete={handleDeleteSpecialist} />
                   </TableCell>
                 </TableRow>);})}

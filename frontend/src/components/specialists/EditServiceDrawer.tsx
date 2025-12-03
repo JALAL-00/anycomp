@@ -60,7 +60,6 @@ const EditServiceDrawer: React.FC<EditServiceDrawerProps> = ({ open, onClose, se
         }
     }, [open, service]);
 
-    // Reusable Label component to match Figma's style
     const FormLabel = ({ children }: { children: React.ReactNode }) => (
         <Typography variant="body2" sx={{ fontWeight: 500, color: 'text.primary', mb: 1 }}>{children}</Typography>
     );

@@ -9,7 +9,7 @@ import Link from 'next/link';
 
 interface SpecialistActionsProps {
     specialistId: string;
-    slug: string; // Add slug to the props
+    slug: string; 
     onDelete: (id: string) => void;
 }
 
@@ -18,7 +18,6 @@ const SpecialistActions: React.FC<SpecialistActionsProps> = ({ specialistId, slu
     const open = Boolean(anchorEl);
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-        // Stop the row's onClick event from firing when the menu is opened
         event.stopPropagation(); 
         setAnchorEl(event.currentTarget);
     };
@@ -64,7 +63,6 @@ const SpecialistActions: React.FC<SpecialistActionsProps> = ({ specialistId, slu
                     },
                 }}
             >
-                {/* CRITICAL CHANGE: Update the href to point to the service detail page */}
                 <MenuItem component={Link} href={`/admin/services/${slug}`}>
                     <ListItemIcon>
                         <EditIcon fontSize="small" />
