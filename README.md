@@ -1,4 +1,4 @@
-# Anycomp - Fullstack Developer Project Assessment (ST COMP HOLDINGS SDN BHD)
+# Anycomp - Fullstack Project
 
 This is a complete, production-grade implementation of the **Anycomp Specialist Registration and Management System**, developed as a full-stack proficiency assessment.
 
