@@ -27,3 +27,6 @@ lerna-debug.log*
 .DS_Store
 /backend/.DS_Store
 /frontend/.DS_Store
+
+# Antigravity AI
+.gemini
