@@ -5,6 +5,7 @@ export enum MimeType {
   JPG = 'image/jpeg',
   PNG = 'image/png',
   MP4 = 'video/mp4',
+  WEBP = 'image/webp',
 }
 
 export enum MediaType {

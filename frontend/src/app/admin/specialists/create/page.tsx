@@ -7,6 +7,7 @@ import AdditionalOfferingsSection from '@/components/specialists/AdditionalOffer
 import ProfileCardSection from '@/components/specialists/ProfileCardSection';
 import api from '@/lib/api';
 
+// Reusable EditableImage Component
 const EditableImage = ({ src, alt, onImageUpload }: { src?: string; alt: string; onImageUpload: (file: File) => void; }) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const [isUploading, setIsUploading] = useState(false);
@@ -20,28 +21,17 @@ const EditableImage = ({ src, alt, onImageUpload }: { src?: string; alt: string;
     return (<Box onClick={handleContainerClick} sx={{ position: 'relative', width: '100%', height: '100%', cursor: 'pointer', bgcolor: '#f1f5f9', borderRadius: '12px', overflow: 'hidden', '&:hover .overlay': { opacity: 1 }, border: '2px dashed #e2e8f0' }}><input type="file" ref={inputRef} onChange={handleFileChange} hidden accept="image/*" />{src ? (<img src={src} alt={alt} className="w-full h-full object-cover" />) : (<Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'text.secondary', p: 2, textAlign: 'center' }}><Typography variant="body2">Click to upload</Typography></Box>)}<div className="overlay absolute inset-0 bg-black/50 flex items-center justify-center text-white text-sm font-semibold opacity-0 transition-opacity pointer-events-none">{isUploading ? <CircularProgress color="inherit" size={24}/> : 'Change Image'}</div></Box>);
 };
 
-interface FormData {
-    title: string;
-    description: string;
-    duration_days: number;
-}
-
 export default function CreateServicePage() {
     const router = useRouter();
-    const [formData, setFormData] = useState<FormData>({
-        title: '',
-        description: '',
-        duration_days: 7,
-    });
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+    const [durationDays, setDurationDays] = useState(7);
+    const [companyType, setCompanyType] = useState('Private Limited - Sdn. Bhd'); // Add state for company type
     const [basePrice, setBasePrice] = useState(1800);
     const [images, setImages] = useState<(File | null)[]>([null, null, null]);
     const [previews, setPreviews] = useState<(string | null)[]>([null, null, null]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-
-    const handleFormChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | any) => {
-        setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
-    };
 
     const handleImageUpload = (file: File, index: number) => {
         const newImages = [...images]; newImages[index] = file; setImages(newImages);
@@ -49,22 +39,24 @@ export default function CreateServicePage() {
     };
 
     const handleSave = async () => {
-        if (!formData.title || !formData.description) { setError("Title and Description are required."); return; }
+        if (!title || !description) { setError("Title and Description are required."); return; }
         setLoading(true);
         setError(null);
 
         const submissionData = new FormData();
-        submissionData.append('title', formData.title);
-        submissionData.append('description', formData.description);
+        submissionData.append('title', title);
+        submissionData.append('description', description);
         submissionData.append('base_price', String(basePrice));
-        submissionData.append('duration_days', String(formData.duration_days));
+        submissionData.append('duration_days', String(durationDays));
+        // We can add companyType to submissionData if the backend needs it
+        // submissionData.append('company_type', companyType);
         images.forEach((file) => { if (file) { submissionData.append('images', file); } });
         
         try {
             await api.post('/specialists', submissionData, { headers: { 'Content-Type': 'multipart/form-data' } });
             router.push('/admin/specialists');
         } catch (err: any) {
-            setError(err || "Failed to create service.");
+            setError(err.message || "Failed to create service.");
         } finally {
             setLoading(false);
         }
@@ -86,7 +78,7 @@ export default function CreateServicePage() {
 
             <div className="grid grid-cols-12 gap-8">
                 <div className="col-span-8 space-y-8">
-                    <TextField fullWidth required name="title" label="Service Title" value={formData.title} onChange={handleFormChange} />
+                    <TextField fullWidth required label="Service Title" value={title} onChange={(e) => setTitle(e.target.value)} />
                     <div className="flex h-[400px] gap-4">
                         <div className="w-2/3"><EditableImage src={previews[0] || undefined} alt="Primary Image" onImageUpload={(file) => handleImageUpload(file, 0)} /></div>
                         <div className="w-1/3 flex flex-col gap-4">
@@ -97,13 +89,13 @@ export default function CreateServicePage() {
                     
                     <div className="space-y-2">
                         <Typography variant="h6" className='font-semibold'>Description</Typography>
-                        <TextField fullWidth multiline rows={4} name="description" label="Service Description" value={formData.description} onChange={handleFormChange} />
+                        <TextField fullWidth multiline rows={4} label="Service Description" value={description} onChange={(e) => setDescription(e.target.value)} />
                     </div>
                     
                     <div className="flex space-x-4">
                         <FormControl fullWidth>
                             <InputLabel>Estimated Completion Time</InputLabel>
-                            <Select name="duration_days" value={formData.duration_days} label="Estimated Completion Time" onChange={handleFormChange}>
+                            <Select value={durationDays} label="Estimated Completion Time" onChange={(e) => setDurationDays(e.target.value as number)}>
                                 <MenuItem value={1}>1 Day</MenuItem>
                                 <MenuItem value={3}>3 Days</MenuItem>
                                 <MenuItem value={4}>4 Days</MenuItem>
@@ -115,7 +107,7 @@ export default function CreateServicePage() {
                         </FormControl>
                         <FormControl fullWidth>
                              <InputLabel>Supported Company Types</InputLabel>
-                            <Select value="Private Limited - Sdn. Bhd" label="Supported Company Types">
+                            <Select value={companyType} label="Supported Company Types" onChange={(e) => setCompanyType(e.target.value as string)}>
                                 <MenuItem value="Private Limited - Sdn. Bhd">Private Limited - Sdn. Bhd</MenuItem>
                                 <MenuItem value="Public Limited - Bhd">Public Limited - Bhd</MenuItem>
                                 <MenuItem value="Limited Liability Partnership - LLP">Limited Liability Partnership - LLP</MenuItem>
