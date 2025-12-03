@@ -32,4 +32,5 @@ lerna-debug.log*
 .gemini
 
 # File Image
-/backend/public/uploads
+/backend/public/uploads/*
+!/backend/public/uploads/.gitkeep
