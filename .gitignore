@@ -32,4 +32,4 @@ lerna-debug.log*
 .gemini
 
 # File Image
-/backend/public/*
+/backend/public/uploads
