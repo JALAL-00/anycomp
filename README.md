@@ -4,7 +4,7 @@ This is a complete, production-grade implementation of the **Anycomp Specialist 
 
 The project features a **PostgreSQL** backend managed by a robust **Next.js/React** frontend with **JWT** for secure administrative access, designed to be a pixel-perfect match of the provided Figma designs.
 
-## 🚀 Key Features Implemented
+## Key Features Implemented
 
 *   **Full-Stack Architecture:** Next.js (Frontend) + Node.js/Express/TypeORM (Backend).
 *   **Database:** PostgreSQL with transactional migrations to create all required tables.
@@ -19,7 +19,7 @@ The project features a **PostgreSQL** backend managed by a robust **Next.js/Reac
 
 ---
 
-## 💻 Tech Stack Summary
+## Tech Stack Summary
 
 | Component  | Technology                                                              | Notes                                                               |
 | :--------- | :---------------------------------------------------------------------- | :------------------------------------------------------------------ |
@@ -30,7 +30,7 @@ The project features a **PostgreSQL** backend managed by a robust **Next.js/Reac
 
 ---
 
-## 🛠️ Local Setup and Installation
+## Local Setup and Installation
 
 ### A. Prerequisites
 
@@ -61,7 +61,7 @@ The project features a **PostgreSQL** backend managed by a robust **Next.js/Reac
     DB_DATABASE=anycomp_db
 
     # Security
-    JWT_SECRET=9f2b7cda4a8348d3a2f58f49ad5bfae2d6c4a1e9d8b7c6f5a4b3c2d1e0f9a8b7
+    JWT_SECRET=a-very-secure-secret-for-the-assessment
     ```
 4.  Run all database migrations to build the schema:
     ```bash
@@ -101,7 +101,7 @@ An initial admin user is automatically created by the backend on the first run.
 
 ---
 
-## 🔐 Final Verification Flow
+## Final Verification Flow
 
 1.  **Login:** Open `http://localhost:3000/login` and sign in with the default admin credentials:
     *   **Email:** `admin@stcomp.com`
@@ -116,7 +116,3 @@ An initial admin user is automatically created by the backend on the first run.
 
 ---
 
-### 👨‍💻 Author
-
-**Role:** Full-Stack Developer Assessment
-**For:** ST COMP HOLDINGS SDN BHD
