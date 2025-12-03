@@ -10,7 +10,6 @@ import ProfileCardSection from '@/components/specialists/ProfileCardSection';
 import ConfirmationModal from '@/components/ui/ConfirmationModal';
 import api from '@/lib/api';
 
-// Helper to get the base URL of the backend API
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '');
 
 const EditableImage = ({ src, alt, onImageUpload }: { src?: string; alt: string; onImageUpload: (file: File) => void; }) => {
@@ -34,9 +33,8 @@ const EditableImage = ({ src, alt, onImageUpload }: { src?: string; alt: string;
         }
     };
     
-    // Construct the full URL for the image
     const imageUrl = src ? (src.startsWith('blob:') ? src : `${API_BASE_URL}${src}`) : undefined;
-
+    
     return (
         <Box 
             onClick={handleContainerClick}
@@ -45,11 +43,11 @@ const EditableImage = ({ src, alt, onImageUpload }: { src?: string; alt: string;
                 width: '100%', 
                 height: '100%',
                 cursor: 'pointer',
-                bgcolor: '#f1f5f9', // Use a light gray background for empty state
+                bgcolor: '#f1f5f9',
                 borderRadius: '12px',
                 overflow: 'hidden',
                 '&:hover .overlay': { opacity: 1 },
-                border: '2px dashed #e2e8f0' // Dashed border for empty state
+                border: '2px dashed #e2e8f0'
             }}
         >
             <input type="file" ref={inputRef} onChange={handleFileChange} hidden accept="image/*" />
@@ -137,7 +135,6 @@ export default function ServiceDetailsPage() {
     const mediaSlot1 = service.media?.find(m => m.display_order === 1);
     const mediaSlot2 = service.media?.find(m => m.display_order === 2);
     const mediaSlot3 = service.media?.find(m => m.display_order === 3);
-
     const basePriceNum = parseFloat(String(service.base_price) || '0');
     const platformFeeNum = parseFloat(String(service.platform_fee) || '0');
     const finalPriceNum = basePriceNum + platformFeeNum;
@@ -160,30 +157,31 @@ export default function ServiceDetailsPage() {
             <div className="grid grid-cols-12 gap-8">
                 <div className="col-span-8 space-y-8">
                     <div className="flex h-[400px] gap-4">
-                        <div className="w-2/3">
-                            <EditableImage src={mediaSlot1?.file_name} alt="Primary Image" onImageUpload={(file) => handleImageUpload(file, 1)} />
-                        </div>
+                        <div className="w-2/3"><EditableImage src={mediaSlot1?.file_name} alt="Primary Image" onImageUpload={(file) => handleImageUpload(file, 1)} /></div>
                         <div className="w-1/3 flex flex-col gap-4">
-                            <div className="h-1/2">
-                               <EditableImage src={mediaSlot2?.file_name} alt="Secondary Image" onImageUpload={(file) => handleImageUpload(file, 2)} />
-                            </div>
-                            <div className="h-1/2">
-                                <EditableImage src={mediaSlot3?.file_name} alt="Tertiary Image" onImageUpload={(file) => handleImageUpload(file, 3)} />
-                            </div>
+                            <div className="h-1/2"><EditableImage src={mediaSlot2?.file_name} alt="Secondary Image" onImageUpload={(file) => handleImageUpload(file, 2)} /></div>
+                            <div className="h-1/2"><EditableImage src={mediaSlot3?.file_name} alt="Tertiary Image" onImageUpload={(file) => handleImageUpload(file, 3)} /></div>
                         </div>
                     </div>
                     
-                    <div className="space-y-2"><Typography variant="h6" className='font-semibold'>Description</Typography><Typography className="text-zinc-500 leading-relaxed pt-2 border-t">{service.description}</Typography></div>
-                    <div className="space-y-2"><Typography variant="h6" className='font-semibold'>Additional Offerings</Typography><div className="pt-4 border-t"><AdditionalOfferingsSection /></div></div>
+                    <div className="space-y-2">
+                        <Typography variant="h6" className='font-semibold'>Description</Typography>
+                        <Typography className="text-zinc-500 leading-relaxed pt-2 border-t">{service.description}</Typography>
+                    </div>
+
+                    <div className="space-y-4">
+                        <Typography variant="h6" className='font-semibold'>Additional Offerings</Typography>
+                        <Typography variant="body2" sx={{ color: 'text.secondary', mt: -1 }}>Enhance your service by adding additional offerings</Typography>
+                    </div>
+
                     <ProfileCardSection />
                 </div>
+
                 <div className="col-span-4">
                      <Paper variant="outlined" className="p-6 sticky top-6">
                         <Typography variant="h6" className="font-semibold mb-1">Professional Fee</Typography>
                         <Typography variant="body2" className="text-zinc-500 mb-4">Set a rate for your service</Typography>
-                        <Typography variant="h3" className="font-bold my-4 text-center border-b pb-4">
-                            RM {basePriceNum.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                        </Typography>
+                        <Typography variant="h3" className="font-bold my-4 text-center border-b pb-4">RM {basePriceNum.toLocaleString('en-US', { minimumFractionDigits: 2 })}</Typography>
                         <div className="space-y-2 mt-4 text-sm">
                            <div className='flex justify-between'><span className="text-zinc-600">Base price</span><span className="font-medium">RM {basePriceNum.toFixed(2)}</span></div>
                            <div className='flex justify-between'><span className="text-zinc-600">Service processing fee</span><span className="font-medium">RM {platformFeeNum.toFixed(2)}</span></div>
