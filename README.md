@@ -131,7 +131,7 @@ Edit Service PopUp:
 
 Service Pulished:
 ---
-For See the Publised Page *   **URL:** `http://localhost:3000/specialists`
+For See the Publised Page: `http://localhost:3000/specialists`
 ---
 ![Image](https://github.com/user-attachments/assets/3b1f7bf5-bfa9-483e-91cb-2dd31adb9f0b)
 
