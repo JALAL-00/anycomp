@@ -121,17 +121,22 @@ An initial admin user is automatically created by the backend on the first run.
 **Specialist Dashboard:**
 ![Image](https://github.com/user-attachments/assets/1afb32fe-6759-4c0c-8246-c72ff9a06f15)
 
+---
 **Create New Service:**
 ![Image](https://github.com/user-attachments/assets/cd7bed56-a0df-46c8-a701-6134efc7ec55)
 
+---
 **Service Detail Page & Edit Drawer:**
 ![Image](https://github.com/user-attachments/assets/aa06923e-f587-4ad7-abc9-4b58fc1f8e4e)
 
+---
 **Service Published (Public Marketplace):**
 
 To view the public page, navigate to `http://localhost:3000/specialists` after publishing a service.
+---
 ![Image](https://github.com/user-attachments/assets/3b1f7bf5-bfa9-483e-91cb-2dd31adb9f0b)
 
 **Login & Logout:**
 ![Image](https://github.com/user-attachments/assets/e84eda55-c294-4ab4-acd3-a88ca3459eae)
+---
 ![Image](https://github.com/user-attachments/assets/6469fba6-5545-4069-bdd7-13dab18310d5)
