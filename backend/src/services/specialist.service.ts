@@ -23,8 +23,19 @@ const createUniqueSlug = async (title: string, id?: string): Promise<string> => 
   }
 };
 
-export const createOrUpdateSpecialistWithMedia = async (data: any, files: Express.Multer.File[] | undefined, mode: 'create' | 'update', specialistId?: string): Promise<Specialist> => {
-    const parsedData: DeepPartial<Specialist> = { title: data.title, description: data.description, base_price: data.base_price ? parseFloat(data.base_price) : 0, duration_days: data.duration_days ? parseInt(data.duration_days, 10) : 1 };
+export const createOrUpdateSpecialistWithMedia = async (
+    data: any,
+    files: Express.Multer.File[] | undefined, // Make files optional
+    mode: 'create' | 'update', 
+    specialistId?: string
+): Promise<Specialist> => {
+    const parsedData: DeepPartial<Specialist> = {
+        title: data.title,
+        description: data.description,
+        base_price: data.base_price ? parseFloat(data.base_price) : 0,
+        duration_days: data.duration_days ? parseInt(data.duration_days, 10) : 1,
+    };
+
     if (parsedData.base_price) {
         const basePrice = parsedData.base_price;
         const platformFee = basePrice * PLATFORM_FEE_RATE;
@@ -32,26 +43,43 @@ export const createOrUpdateSpecialistWithMedia = async (data: any, files: Expres
         parsedData.platform_fee = platformFee;
         parsedData.final_price = finalPrice;
     }
+    
     return AppDataSource.manager.transaction(async (transactionalEntityManager) => {
         let specialist: Specialist;
+
         if (mode === 'create') {
             parsedData.slug = await createUniqueSlug(parsedData.title!);
             specialist = transactionalEntityManager.create(Specialist, parsedData); 
         } else {
             const existing = await transactionalEntityManager.findOneBy(Specialist, { id: specialistId });
             if (!existing) { throw new ApiError(404, `Specialist with ID ${specialistId} not found.`); }
-            if (parsedData.title && parsedData.title !== existing.title) { parsedData.slug = await createUniqueSlug(parsedData.title, specialistId); }
+            if (parsedData.title && parsedData.title !== existing.title) {
+                parsedData.slug = await createUniqueSlug(parsedData.title, specialistId);
+            }
             specialist = transactionalEntityManager.merge(Specialist, existing, parsedData) as Specialist;
         }
+
         const savedSpecialist = await transactionalEntityManager.save(specialist); 
+        
+        // CRITICAL FIX: Check if files exist before iterating
         if (files && files.length > 0) {
             const mediaEntities = files.map((file, index) => {
                 const relativePath = `/uploads/${file.filename}`;
-                return transactionalEntityManager.create(Media, { file_name: relativePath, file_size: file.size, mime_type: file.mimetype as any, display_order: index + 1, specialist_id: savedSpecialist.id });
+                return transactionalEntityManager.create(Media, { 
+                    file_name: relativePath,
+                    file_size: file.size,
+                    mime_type: file.mimetype as any,
+                    display_order: index + 1, 
+                    specialist_id: savedSpecialist.id 
+                });
             });
             await transactionalEntityManager.save(mediaEntities);
         }
-        return transactionalEntityManager.findOneOrFail(Specialist, { where: { id: savedSpecialist.id }, relations: ['media', 'service_offerings'], });
+        
+        return transactionalEntityManager.findOneOrFail(Specialist, {
+            where: { id: savedSpecialist.id },
+            relations: ['media', 'service_offerings'],
+        });
     });
 };
 
@@ -110,7 +138,6 @@ export const updateMediaSlot = async (specialistId: string, displayOrder: number
             await fs.unlink(path.join(__dirname, '../../public/uploads', oldFilename));
         } catch (err) { console.error("Old file not found, continuing...", err); }
     }
-    // THIS IS THE CORRECTED LOGIC
     const relativePath = `/uploads/${file.filename}`;
     if (media) {
         media.file_name = relativePath;
