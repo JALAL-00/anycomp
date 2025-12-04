@@ -1,6 +1,24 @@
 # Anycomp : Full-Stack Project
 
-This is a complete, production-grade implementation of the **Anycomp Specialist Registration and Management System**, developed as a full-stack proficiency assessment.          |
+This is a complete, production-grade implementation of the **Anycomp Specialist Registration and Management System**, developed as a full-stack proficiency assessment.
+
+## 🚀 Live Demo
+
+Access the deployed application here:
+
+*   **Main Application:** [https://anycomp-jalal-project.vercel.app](https://anycomp-jalal-project.vercel.app)
+*   **Public Marketplace:** [https://anycomp-jalal-project.vercel.app/specialists](https://anycomp-jalal-project.vercel.app/specialists)
+
+---
+
+## 🔐 Login Credentials
+
+Use these credentials to access the Admin Dashboard on both **Localhost** and the **Live Demo**:
+
+*   **Login URL (Live):** [https://anycomp-jalal-project.vercel.app/login](https://anycomp-jalal-project.vercel.app/login)
+*   **Login URL (Local):** `http://localhost:3000/login`
+*   **Email:** `admin@stcomp.com`
+*   **Password:** `AdminPassword123`
 
 ---
 
@@ -69,19 +87,9 @@ This is a complete, production-grade implementation of the **Anycomp Specialist 
 
 ---
 
-## 🔐 Login Credentials
-
-An initial admin user is automatically created by the backend on the first run.
-
-*   **URL:** `http://localhost:3000/login`
-*   **Email:** `admin@stcomp.com`
-*   **Password:** `AdminPassword123`
-
----
-
 ## Final Verification Flow
 
-1.  **Login:** Open `http://localhost:3000/login` and sign in with the default admin credentials.
+1.  **Login:** Open the login page (Local or Live) and sign in with the default admin credentials.
 2.  **Dashboard:** You will be redirected to the **Specialists List** (`/admin/specialists`).
 3.  **Create Service:** Click the **CREATE** button. Fill out the form, including Title, Description, Price, and upload at least one image. Click **Save & Create**.
 4.  **Verify Creation:** You will be redirected back to the Specialists List. Your new service should appear in the table.
@@ -140,4 +148,4 @@ The project features a **PostgreSQL** backend managed by a robust **Next.js/Reac
 | **Frontend** | Next.js (App Router), TypeScript, Tailwind CSS, Material UI, Redux Toolkit | Client-side application with state management and component architecture. |
 | **Backend**  | Node.js, Express, TypeScript, TypeORM                                   | RESTful API with middleware, services, and error handling.          |
 | **Database** | PostgreSQL                                                              | Relational database (strictly NOT MongoDB).                         |
-| **Auth**     | JWT, BCrypt                                                             | Admin-only access enforcement on critical API endpoints.  
+| **Auth**     | JWT, BCrypt                                                             | Admin-only access enforcement on critical API endpoints.            |
