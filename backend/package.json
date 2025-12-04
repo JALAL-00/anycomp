@@ -4,14 +4,16 @@
   "description": "Backend for Anycomp Fullstack Developer Project",
   "main": "src/app.ts",
   "scripts": {
-    "start": "ts-node src/app.ts",
+    "start": "node dist/app.js",
     "dev": "nodemon src/app.ts",
     "typeorm": "typeorm-ts-node-commonjs -d src/db/data-source.ts",
+    "typeorm:prod": "typeorm -d dist/db/data-source.js",
     "migration:create": "npm run typeorm migration:create src/db/migrations/%npm_config_name%",
     "migration:run": "npm run typeorm migration:run",
+    "migration:run:prod": "npm run typeorm:prod migration:run",
     "migration:revert": "npm run typeorm migration:revert",
-    "build": "npm install && tsc",
-    "postbuild": "npm run migration:run"
+    "build": "tsc",
+    "postbuild": "npm run migration:run:prod"
   },
   "keywords": [
     "express",
