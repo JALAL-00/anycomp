@@ -4,7 +4,6 @@ import fs from 'fs';
 
 const uploadDir = path.join(__dirname, '../../public/uploads');
 
-// Create upload directory with error handling
 try {
     if (!fs.existsSync(uploadDir)) {
         console.log(`📁 Creating upload directory: ${uploadDir}`);
@@ -14,7 +13,6 @@ try {
         console.log(`✅ Upload directory exists: ${uploadDir}`);
     }
 
-    // Check if directory is writable
     fs.accessSync(uploadDir, fs.constants.W_OK);
     console.log('✅ Upload directory is writable');
 } catch (error) {
@@ -25,7 +23,6 @@ try {
 
 const storage = multer.diskStorage({
     destination: (req: any, file: any, cb: any) => {
-        // Double-check directory exists before each upload
         if (!fs.existsSync(uploadDir)) {
             try {
                 fs.mkdirSync(uploadDir, { recursive: true });
