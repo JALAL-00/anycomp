@@ -3,6 +3,7 @@
 import type { Metadata } from "next";
 import "../styles/globals.css";
 import { Providers } from "./providers"; 
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 // Set required metadata
 export const metadata: Metadata = {
