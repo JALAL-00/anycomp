@@ -10,9 +10,15 @@ import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import LogoutIcon from '@mui/icons-material/Logout';
 import SettingsIcon from '@mui/icons-material/Settings';
+import MenuIcon from '@mui/icons-material/Menu'; // Added Icon
 import { useAuth } from '@/context/AuthContext';
 
-const Header: React.FC = () => {
+// Added Props Interface to accept toggle handler
+interface HeaderProps {
+    onMobileMenuToggle?: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ onMobileMenuToggle }) => {
     const { logout } = useAuth();
     const pathname = usePathname();
     const { user } = useSelector((state: RootState) => state.auth); 
@@ -32,9 +38,22 @@ const Header: React.FC = () => {
     const handleLogout = () => { logout(); handleClose(); };
 
     return (
-        <header className="flex-shrink-0 flex items-center justify-between h-20 px-8 border-b border-zinc-200 bg-white">
-            <Box><Typography sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>{breadcrumb}</Typography></Box>
-            <div className="flex items-center space-x-2">
+        <header className="flex-shrink-0 flex items-center justify-between h-20 px-4 md:px-8 border-b border-zinc-200 bg-white sticky top-0 z-20">
+            <div className="flex items-center">
+                {/* Mobile Hamburger Button (Hidden on Desktop) */}
+                <IconButton 
+                    edge="start" 
+                    color="inherit" 
+                    aria-label="menu" 
+                    onClick={onMobileMenuToggle}
+                    sx={{ mr: 2, display: { lg: 'none' }, color: 'text.secondary' }}
+                >
+                    <MenuIcon />
+                </IconButton>
+                
+                <Box><Typography sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>{breadcrumb}</Typography></Box>
+            </div>
+            <div className="flex items-center space-x-1 md:space-x-2">
                 <IconButton sx={{ color: 'text.secondary' }}><MailOutlineIcon /></IconButton>
                 <IconButton sx={{ color: 'text.secondary' }}><Badge color="error" variant="dot"><NotificationsNoneIcon /></Badge></IconButton>
                 <IconButton onClick={handleClick} size="small"><PersonOutlineIcon /></IconButton>

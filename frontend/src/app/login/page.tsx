@@ -5,16 +5,18 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
-import { TextField, Button, Typography, Paper, CircularProgress, Link as MUILink } from '@mui/material';
-import Link from 'next/link';
+import { TextField, Button, Typography, Paper, CircularProgress } from '@mui/material';
 import { useAuth } from '@/context/AuthContext';
 
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
   const { loading, error, isAuthenticated } = useSelector((state: RootState) => state.auth);
-  const [email, setEmail] = useState('admin@stcomp.com');
-  const [password, setPassword] = useState('AdminPassword123');
+  
+  // CHANGED: Initialize with empty strings instead of hardcoded credentials
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  
   const [localError, setLocalError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -44,7 +46,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-bg-light">
+    <div className="flex min-h-screen items-center justify-center bg-bg-light px-4">
       <Paper className="p-8 shadow-2xl w-full max-w-md bg-white border border-zinc-100" sx={{ borderRadius: '12px' }}>
 
         <div className="text-center mb-8">
@@ -99,7 +101,7 @@ export default function LoginPage() {
               borderRadius: '8px'
             }}
           >
-            {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign In'} {/* <-- CORRECT BUTTON TEXT */}
+            {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign In'}
           </Button>
         </form>
       </Paper>

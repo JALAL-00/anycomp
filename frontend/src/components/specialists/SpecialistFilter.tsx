@@ -1,4 +1,3 @@
-// src/components/specialists/SpecialistFilter.tsx 
 'use client';
 
 import React, { useState } from 'react';
@@ -28,16 +27,16 @@ const SpecialistFilter: React.FC = () => {
   };
 
   return (
-    <div className="flex justify-between items-start mb-6">
+    <div className="flex flex-col lg:flex-row justify-between items-start mb-6 gap-4">
       
-      <div className="flex flex-col space-y-4"> 
+      <div className="flex flex-col space-y-4 w-full lg:w-auto"> 
         
-        <div className="flex space-x-2 border-b border-zinc-200">
+        <div className="flex space-x-2 border-b border-zinc-200 overflow-x-auto">
           {TABS.map(tab => (
             <button
               key={tab}
               onClick={() => dispatch(setFilter(tab))}
-              className={`pb-2 px-3 text-sm font-semibold transition-colors duration-150 ${
+              className={`pb-2 px-3 text-sm font-semibold transition-colors duration-150 whitespace-nowrap ${
                 currentFilter === tab
                   ? 'text-primary-blue border-b-2 border-primary-blue'
                   : 'text-zinc-500 hover:text-zinc-800'
@@ -54,7 +53,7 @@ const SpecialistFilter: React.FC = () => {
           placeholder="Search Services" 
           value={localSearch}
           onChange={handleSearchChange}
-          className='w-80' 
+          className='w-full lg:w-80' 
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -94,12 +93,12 @@ const SpecialistFilter: React.FC = () => {
           }}
         />
       </div>
-      <div className="flex space-x-3 mt-0"> 
-        <Link href="/admin/specialists/create" passHref>
+      <div className="flex space-x-3 mt-0 w-full lg:w-auto"> 
+        <Link href="/admin/specialists/create" passHref className="flex-1 lg:flex-none">
           <Button
             variant="contained"
             startIcon={<AddIcon />}
-            className="normal-case font-semibold"
+            className="normal-case font-semibold w-full lg:w-auto"
             sx={{ 
                 bgcolor: '#00244F', 
                 '&:hover': { bgcolor: '#0D47A1' },
@@ -114,7 +113,7 @@ const SpecialistFilter: React.FC = () => {
         <Button
           variant="outlined"
           startIcon={<GetAppIcon />}
-          className="normal-case font-semibold"
+          className="normal-case font-semibold flex-1 lg:flex-none"
           sx={{
             color: 'var(--tw-colors-text-primary)',
             borderColor: '#D1D5DB',

@@ -26,8 +26,8 @@ export default function PublicSpecialistsPage() {
     }, []);
 
     return (
-        <Box sx={{ maxWidth: '1400px', mx: 'auto', p: 4 }}>
-            <header className="flex justify-between items-center py-4 mb-6 border-b">
+        <Box sx={{ maxWidth: '1400px', mx: 'auto', p: { xs: 2, md: 4 } }}>
+            <header className="flex flex-col md:flex-row justify-between items-start md:items-center py-4 mb-6 border-b gap-4">
                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>ANYCOMP</Typography>
             </header>
 
@@ -36,14 +36,14 @@ export default function PublicSpecialistsPage() {
                 <Typography color="text.primary">Register a New Company</Typography>
             </Breadcrumbs>
             
-            <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>Register a New Company</Typography>
+            <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1, fontSize: { xs: '1.75rem', md: '2.125rem' } }}>Register a New Company</Typography>
             <Typography sx={{ color: 'text.secondary', mb: 4 }}>Get Your Company Registered with a Trusted Specialists</Typography>
 
             <div className="flex space-x-2 mb-4">
-                 <Select defaultValue="price" size="small" sx={{ borderRadius: '8px' }}>
+                 <Select defaultValue="price" size="small" sx={{ borderRadius: '8px', minWidth: 100 }}>
                      <MenuItem value="price">Price</MenuItem>
                 </Select>
-                 <Select defaultValue="sort" size="small" sx={{ borderRadius: '8px' }}>
+                 <Select defaultValue="sort" size="small" sx={{ borderRadius: '8px', minWidth: 100 }}>
                      <MenuItem value="sort">Sort by</MenuItem>
                 </Select>
             </div>

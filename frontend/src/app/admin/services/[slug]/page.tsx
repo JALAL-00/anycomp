@@ -47,7 +47,8 @@ const EditableImage = ({ src, alt, onImageUpload }: { src?: string; alt: string;
                 borderRadius: '12px',
                 overflow: 'hidden',
                 '&:hover .overlay': { opacity: 1 },
-                border: '2px dashed #e2e8f0'
+                border: '2px dashed #e2e8f0',
+                minHeight: '160px' // Added min-height for mobile
             }}
         >
             <input type="file" ref={inputRef} onChange={handleFileChange} hidden accept="image/*" />
@@ -144,23 +145,24 @@ export default function ServiceDetailsPage() {
             {isDrawerOpen && <EditServiceDrawer service={service} open={isDrawerOpen} onClose={() => setDrawerOpen(false)} onSaveSuccess={handleEditSuccess} />}
             <ConfirmationModal open={isPublishModalOpen} title="Publish changes" message="Do you want to publish these changes? It will appear in the marketplace listing." onConfirm={handlePublish} onCancel={() => setPublishModalOpen(false)} />
             
-            <div className="flex justify-between items-center mb-6">
-                <Typography variant="h4" className="font-bold text-text-primary">{service.title}</Typography>
-                <div className="flex space-x-3">
-                    <Button variant="outlined" sx={{ borderRadius: '6px', borderColor: '#00244F', color: '#00244F' }} onClick={() => setDrawerOpen(true)}>Edit</Button>
-                    <Button variant="contained" onClick={() => setPublishModalOpen(true)} disabled={!service.is_draft} sx={{ borderRadius: '6px', bgcolor: service.is_draft ? '#00244F' : '#4CAF50', '&:hover': { bgcolor: service.is_draft ? '#001a38' : '#388E3C', } }}>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                <Typography variant="h4" className="font-bold text-text-primary text-2xl md:text-3xl">{service.title}</Typography>
+                <div className="flex space-x-3 w-full md:w-auto">
+                    <Button variant="outlined" sx={{ borderRadius: '6px', borderColor: '#00244F', color: '#00244F', flex: 1, maxWidth: {md: '100px'} }} onClick={() => setDrawerOpen(true)}>Edit</Button>
+                    <Button variant="contained" onClick={() => setPublishModalOpen(true)} disabled={!service.is_draft} sx={{ borderRadius: '6px', bgcolor: service.is_draft ? '#00244F' : '#4CAF50', '&:hover': { bgcolor: service.is_draft ? '#001a38' : '#388E3C', }, flex: 1, maxWidth: {md: '150px'} }}>
                         {service.is_draft ? 'Publish' : 'Published'}
                     </Button>
                 </div>
             </div>
 
             <div className="grid grid-cols-12 gap-8">
-                <div className="col-span-8 space-y-8">
-                    <div className="flex h-[400px] gap-4">
-                        <div className="w-2/3"><EditableImage src={mediaSlot1?.file_name} alt="Primary Image" onImageUpload={(file) => handleImageUpload(file, 1)} /></div>
-                        <div className="w-1/3 flex flex-col gap-4">
-                            <div className="h-1/2"><EditableImage src={mediaSlot2?.file_name} alt="Secondary Image" onImageUpload={(file) => handleImageUpload(file, 2)} /></div>
-                            <div className="h-1/2"><EditableImage src={mediaSlot3?.file_name} alt="Tertiary Image" onImageUpload={(file) => handleImageUpload(file, 3)} /></div>
+                <div className="col-span-12 lg:col-span-8 space-y-8">
+                    {/* Responsive Image Layout: Stack columns on mobile, row on large screens */}
+                    <div className="flex flex-col lg:flex-row h-auto lg:h-[400px] gap-4">
+                        <div className="w-full lg:w-2/3 h-[250px] lg:h-full"><EditableImage src={mediaSlot1?.file_name} alt="Primary Image" onImageUpload={(file) => handleImageUpload(file, 1)} /></div>
+                        <div className="w-full lg:w-1/3 flex flex-row lg:flex-col gap-4 h-[150px] lg:h-full">
+                            <div className="w-1/2 lg:w-full h-full lg:h-1/2"><EditableImage src={mediaSlot2?.file_name} alt="Secondary Image" onImageUpload={(file) => handleImageUpload(file, 2)} /></div>
+                            <div className="w-1/2 lg:w-full h-full lg:h-1/2"><EditableImage src={mediaSlot3?.file_name} alt="Tertiary Image" onImageUpload={(file) => handleImageUpload(file, 3)} /></div>
                         </div>
                     </div>
                     
@@ -177,7 +179,7 @@ export default function ServiceDetailsPage() {
                     <ProfileCardSection />
                 </div>
 
-                <div className="col-span-4">
+                <div className="col-span-12 lg:col-span-4">
                      <Paper variant="outlined" className="p-6 sticky top-6">
                         <Typography variant="h6" className="font-semibold mb-1">Professional Fee</Typography>
                         <Typography variant="body2" className="text-zinc-500 mb-4">Set a rate for your service</Typography>

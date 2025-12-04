@@ -17,7 +17,7 @@ const EditableImage = ({ src, alt, onImageUpload }: { src?: string; alt: string;
         if (file) { setIsUploading(true); try { await onImageUpload(file); } finally { setIsUploading(false); } }
     };
 
-    return (<Box onClick={handleContainerClick} sx={{ position: 'relative', width: '100%', height: '100%', cursor: 'pointer', bgcolor: '#f1f5f9', borderRadius: '12px', overflow: 'hidden', '&:hover .overlay': { opacity: 1 }, border: '2px dashed #e2e8f0' }}><input type="file" ref={inputRef} onChange={handleFileChange} hidden accept="image/*" />{src ? (<img src={src} alt={alt} className="w-full h-full object-cover" />) : (<Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'text.secondary', p: 2, textAlign: 'center' }}><Typography variant="body2">Click to upload</Typography></Box>)}<div className="overlay absolute inset-0 bg-black/50 flex items-center justify-center text-white text-sm font-semibold opacity-0 transition-opacity pointer-events-none">{isUploading ? <CircularProgress color="inherit" size={24}/> : 'Change Image'}</div></Box>);
+    return (<Box onClick={handleContainerClick} sx={{ position: 'relative', width: '100%', height: '100%', cursor: 'pointer', bgcolor: '#f1f5f9', borderRadius: '12px', overflow: 'hidden', '&:hover .overlay': { opacity: 1 }, border: '2px dashed #e2e8f0', minHeight: '160px' }}><input type="file" ref={inputRef} onChange={handleFileChange} hidden accept="image/*" />{src ? (<img src={src} alt={alt} className="w-full h-full object-cover" />) : (<Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'text.secondary', p: 2, textAlign: 'center' }}><Typography variant="body2">Click to upload</Typography></Box>)}<div className="overlay absolute inset-0 bg-black/50 flex items-center justify-center text-white text-sm font-semibold opacity-0 transition-opacity pointer-events-none">{isUploading ? <CircularProgress color="inherit" size={24}/> : 'Change Image'}</div></Box>);
 };
 
 export default function CreateServicePage() {
@@ -65,7 +65,7 @@ export default function CreateServicePage() {
     return (
         <div className="pb-20">
             <div className="flex justify-between items-center mb-6">
-                <Typography variant="h4" className="font-bold text-text-primary">Create New Service</Typography>
+                <Typography variant="h4" className="font-bold text-text-primary text-2xl md:text-3xl">Create New Service</Typography>
                 <Button variant="contained" sx={{ borderRadius: '6px', bgcolor: '#00244F' }} onClick={handleSave} disabled={loading}>
                     {loading ? <CircularProgress size={24} color="inherit" /> : "Save & Create"}
                 </Button>
@@ -74,13 +74,15 @@ export default function CreateServicePage() {
             {error && <Typography color="error" className="bg-red-50 p-3 rounded-md mb-4">{error}</Typography>}
 
             <div className="grid grid-cols-12 gap-8">
-                <div className="col-span-8 space-y-8">
+                <div className="col-span-12 lg:col-span-8 space-y-8">
                     <TextField fullWidth required label="Service Title" value={title} onChange={(e) => setTitle(e.target.value)} />
-                    <div className="flex h-[400px] gap-4">
-                        <div className="w-2/3"><EditableImage src={previews[0] || undefined} alt="Primary Image" onImageUpload={(file) => handleImageUpload(file, 0)} /></div>
-                        <div className="w-1/3 flex flex-col gap-4">
-                            <div className="h-1/2"><EditableImage src={previews[1] || undefined} alt="Secondary Image" onImageUpload={(file) => handleImageUpload(file, 1)} /></div>
-                            <div className="h-1/2"><EditableImage src={previews[2] || undefined} alt="Tertiary Image" onImageUpload={(file) => handleImageUpload(file, 2)} /></div>
+                    
+                    {/* Responsive Image Grid */}
+                    <div className="flex flex-col lg:flex-row h-auto lg:h-[400px] gap-4">
+                        <div className="w-full lg:w-2/3 h-[250px] lg:h-full"><EditableImage src={previews[0] || undefined} alt="Primary Image" onImageUpload={(file) => handleImageUpload(file, 0)} /></div>
+                        <div className="w-full lg:w-1/3 flex flex-row lg:flex-col gap-4 h-[150px] lg:h-full">
+                            <div className="w-1/2 lg:w-full h-full lg:h-1/2"><EditableImage src={previews[1] || undefined} alt="Secondary Image" onImageUpload={(file) => handleImageUpload(file, 1)} /></div>
+                            <div className="w-1/2 lg:w-full h-full lg:h-1/2"><EditableImage src={previews[2] || undefined} alt="Tertiary Image" onImageUpload={(file) => handleImageUpload(file, 2)} /></div>
                         </div>
                     </div>
                     
@@ -89,7 +91,8 @@ export default function CreateServicePage() {
                         <TextField fullWidth multiline rows={4} label="Service Description" value={description} onChange={(e) => setDescription(e.target.value)} />
                     </div>
                     
-                    <div className="flex space-x-4">
+                    {/* Stack inputs on mobile, side-by-side on desktop */}
+                    <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
                         <FormControl fullWidth>
                             <InputLabel>Estimated Completion Time</InputLabel>
                             <Select value={durationDays} label="Estimated Completion Time" onChange={(e) => setDurationDays(e.target.value as number)}>
@@ -117,7 +120,7 @@ export default function CreateServicePage() {
                     <ProfileCardSection />
                 </div>
                 
-                <div className="col-span-4">
+                <div className="col-span-12 lg:col-span-4">
                      <Paper variant="outlined" className="p-6 sticky top-6">
                         <Typography variant="h6" className="font-semibold mb-1">Professional Fee</Typography>
                         <Typography variant="body2" className="text-zinc-500 mb-4">Set a rate for your service</Typography>

@@ -34,3 +34,7 @@ lerna-debug.log*
 
 # File Image
 /backend/public/uploads/*
+BUILD_FIX.md
+DEPLOYMENT.md
+IMAGE_UPLOAD_FIX.md
+RENDER_CHECKLIST.md

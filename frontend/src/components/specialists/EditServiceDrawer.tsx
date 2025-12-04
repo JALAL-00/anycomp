@@ -65,7 +65,17 @@ const EditServiceDrawer: React.FC<EditServiceDrawerProps> = ({ open, onClose, se
     );
 
     return (
-        <Drawer anchor="right" open={open} onClose={onClose} PaperProps={{ sx: { width: '20vw', maxWidth: '600px', minWidth: '500px' } }}>
+        <Drawer 
+            anchor="right" 
+            open={open} 
+            onClose={onClose} 
+            PaperProps={{ 
+                sx: { 
+                    width: { xs: '100%', sm: '500px' }, // Responsive width
+                    maxWidth: '100%' 
+                } 
+            }}
+        >
             <Box sx={{ p: 4, display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <div className="flex justify-between items-center mb-8">
                     <Typography variant="h5" className="font-bold">Edit Service</Typography>
