@@ -24,15 +24,22 @@ export const AppDataSource = new DataSource({
   database: DB_DATABASE,
   synchronize: NODE_ENV === 'development',
   logging: NODE_ENV === 'development' ? ['error', 'warn', 'query'] : false,
+  ssl: NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
   entities: [
     User,
     Specialist,
     Media,
     PlatformFee,
     ServiceOffering,
-    `${__dirname}/../models/*.ts`
+    NODE_ENV === 'production'
+      ? `${__dirname}/../models/*.js`
+      : `${__dirname}/../models/*.ts`
   ],
-  migrations: [`${__dirname}/../db/migrations/*.ts`],
+  migrations: [
+    NODE_ENV === 'production'
+      ? `${__dirname}/../db/migrations/*.js`
+      : `${__dirname}/../db/migrations/*.ts`
+  ],
   subscribers: []
 });
 

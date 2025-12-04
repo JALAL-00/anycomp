@@ -2,7 +2,7 @@
 
 import type { Metadata } from "next";
 import "../styles/globals.css";
-import { Providers } from "./providers"; 
+import { Providers } from "./providers";
 import { SpeedInsights } from "@vercel/speed-insights/next"
 
 // Set required metadata
@@ -22,6 +22,7 @@ export default function RootLayout({
         <Providers>
           {children}
         </Providers>
+        <SpeedInsights />
       </body>
     </html>
   );
