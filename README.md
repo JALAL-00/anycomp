@@ -2,7 +2,7 @@
 
 This is a complete, production-grade implementation of the **Anycomp Specialist Registration and Management System**, developed as a full-stack proficiency assessment.
 
-## 🚀 Live Demo
+## Live Demo
 
 Access the deployed application here:
 
